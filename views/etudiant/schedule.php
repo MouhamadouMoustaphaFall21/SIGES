@@ -24,6 +24,8 @@ $initials = strtoupper(substr($profile['prenom'], 0, 1) . substr($profile['nom']
     <title>Emploi du Temps - SIGES</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css">
     <link rel="stylesheet" href="../../assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script defer src="../../assets/js/schedule.js"></script>
 </head>
 
 <body>
@@ -33,7 +35,7 @@ $initials = strtoupper(substr($profile['prenom'], 0, 1) . substr($profile['nom']
                 <img src="../../assets/img/logo_simple-SAP.png" alt="SIGES logo">
                 <div class="brand-title">
                     <strong>SIGES</strong>
-                    <span>Système Étudiant</span>
+                    <span>Espace Étudiant</span>
                 </div>
             </div>
 
@@ -51,37 +53,23 @@ $initials = strtoupper(substr($profile['prenom'], 0, 1) . substr($profile['nom']
                 <a href="reclamation.php">Réclamation</a>
             </nav>
 
-            <a href="../../controllers/Logout.php" class="logout-btn"><i class='bx bx-log-out'></i>Déconnexion</a>
+            <a href="../../controllers/Logout.php" class="logout-btn" style="background-color: #f02c16; font-weight: bold;"><i class='bx bx-log-out'></i>Déconnexion</a>
         </aside>
 
         <main class="student-main">
-            <section class="page-header">
+            <section class="page-header page-header-schedule">
                 <div>
                     <p class="eyebrow">Emploi du Temps</p>
                     <h1>Planning de la semaine</h1>
                     <p>Retrouvez tous vos créneaux de cours, les heures et les professeurs de votre classe dans un seul espace.</p>
                     <div class="room-banner">
-                        <span class="badge room-badge">Salle fixe</span>
+                        <span class="badge room-badge" style="color: #F29100; background: rgba(242, 145, 0, 0.12);">Salle fixe</span>
                         <strong>Salle S-12 • Bâtiment principal</strong>
                     </div>
                 </div>
                 <div class="header-user-card">
-                    <p>Bonjour</p>
-                    <strong><?= htmlspecialchars($profile['prenom']) ?></strong>
+                    <strong>Bonjour, <?= htmlspecialchars($profile['prenom']) ?></strong>
                     <span>Bonne consultation</span>
-                </div>
-            </section>
-
-            <section class="tools-bar">
-                <div class="search-box">
-                    <input type="text" placeholder="Rechercher un cours, une matière ou un professeur">
-                    <button type="button">Rechercher</button>
-                </div>
-                <div class="filter-chips">
-                    <span class="filter-chip active">Toutes les semaines</span>
-                    <span class="filter-chip">Cours</span>
-                    <span class="filter-chip">Examens</span>
-                    <span class="filter-chip">Réservations</span>
                 </div>
             </section>
 

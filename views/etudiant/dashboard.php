@@ -88,15 +88,31 @@ $professors = $teacherModel->getProfessorsByClasse($id_classe)->fetchAll(PDO::FE
                 <a href="reclamation.php">Réclamation</a>
             </nav>
 
-            <a href="../../controllers/Logout.php" class="logout-btn"><i class='bx bx-log-out'></i>Déconnexion</a>
+            <a href="../../controllers/Logout.php" class="logout-btn" style="background-color: #f02c16; font-weight: bold;"><i class='bx bx-log-out'></i>Déconnexion</a>
         </aside>
 
         <main class="student-main">
-            <div class="header-user-card">
+
+            <section class="page-header page-header-dashboard">
+                 
+                <div>
+                    <p class="eyebrow">Dashboard étudiant</p>
+                    <h1>Mes notes et ressources</h1>
+                    <p>Consultez votre moyenne, votre rang, vos professeurs, vos camarades et les ressources vidéo recommandées dans un seul espace.</p>
+                    <div class="room-banner">
+                        <span class="badge room-badge" style="color: #F29100; background: rgba(242, 145, 0, 0.12);">Salle fixe</span>
+                        <strong>Salle S-12 • Bâtiment principal</strong>
+                    </div>
+                </div>
+
+                <div class="header-user-card">
                     <strong> Bonjour, <?= htmlspecialchars($studentData['prenom']) ?></strong>
                     <span>Bienvenue sur votre espace</span>
                 </div>
-             <section class="stats-grid">
+              
+            </section>
+
+            <section class="stats-grid">
                 <article class="stat-card">
                     <h3>Moyenne Générale</h3>
                     <p class="stat-value"><?= $moyenneGenerale ?> / 20</p>
@@ -116,39 +132,12 @@ $professors = $teacherModel->getProfessorsByClasse($id_classe)->fetchAll(PDO::FE
                 </article>
             </section>
 
-            <section class="page-header">
-                 
-                <div>
-                    <p class="eyebrow">Dashboard étudiant</p>
-                    <h1>Mes notes et ressources</h1>
-                    <p>Consultez votre moyenne, votre rang, vos professeurs, vos camarades et les ressources vidéo recommandées dans un seul espace.</p>
-                    <div class="room-banner">
-                        <span class="badge room-badge">Salle fixe</span>
-                        <strong>Salle S-12 • Bâtiment principal</strong>
-                    </div>
-                </div>
-              
-            </section>
-
-            <section class="tools-bar">
-                <div class="search-box">
-                    <i class='bx bx-search'></i>
-                    <input type="text" placeholder="Rechercher un cours, une note ou un professeur">
-                    <button type="button"><i class='bx bx-search'></i>Rechercher</button>
-                </div>
-                <div class="filter-chips">
-                    <span class="filter-chip active">Tous </span>
-                    <span class="filter-chip">Vidéos</span>
-                    <span class="filter-chip">Planning</span>
-                </div>
-            </section>
-
             <section class="section-block">
                 <div class="section-title-row">
                     <h2>Ressources vidéo</h2>
                 </div>
                 <div class="video-grid">
-                    <a href="https://www.youtube.com/playlist?list=PLS3QePTb8JS33pr11i6FOjU6kho6qi14j" class="video-card-link" target="_blank" rel="noopener noreferrer">
+                    <a href="https://www.youtube.com/playlist?list=PLkHw7J3J2iaoSgOn1zyHkY_6NwdrtVtfI" class="video-card-link" target="_blank" rel="noopener noreferrer">
                         <article class="video-card">
                             <div class="video-thumb">
                                 <div class="play-icon">▶</div>
@@ -164,7 +153,7 @@ $professors = $teacherModel->getProfessorsByClasse($id_classe)->fetchAll(PDO::FE
                             </div>
                         </article>
                     </a>
-                    <a href="https://www.youtube.com/playlist?list=PLgcyz9E0ZvhdCw0S5AiRy-dOh1jEBSIYQ" class="video-card-link" target="_blank" rel="noopener noreferrer">
+                    <a href="https://www.youtube.com/playlist?list=PLXJw8DkEYeSMkE08RRwdw3JVjGM-pGDec" class="video-card-link" target="_blank" rel="noopener noreferrer">
                         <article class="video-card">
                             <div class="video-thumb">
                                 <div class="play-icon">▶</div>
@@ -180,7 +169,7 @@ $professors = $teacherModel->getProfessorsByClasse($id_classe)->fetchAll(PDO::FE
                             </div>
                         </article>
                     </a>
-                    <a href="https://www.youtube.com/playlist?list=PLu0W_9lII9aiL0kysYlfSOUgY5rNlOhUd" class="video-card-link" target="_blank" rel="noopener noreferrer">
+                    <a href="https://www.youtube.com/playlist?list=PLZpzLuUp9qXx7LSoWwACqRwYmstUbxHKP" class="video-card-link" target="_blank" rel="noopener noreferrer">
                         <article class="video-card">
                             <div class="video-thumb">
                                 <div class="play-icon">▶</div>
@@ -245,25 +234,52 @@ $professors = $teacherModel->getProfessorsByClasse($id_classe)->fetchAll(PDO::FE
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Matière</th>
-                                    <th>Semestre</th>
-                                    <th>Coefficient</th>
-                                    <th>Note</th>
+                                    <th><i class="fas fa-book" style="margin-right: 8px;"></i>Matière</th>
+                                    <th><i class="fas fa-calendar-alt" style="margin-right: 8px;"></i>Semestre</th>
+                                    <th><i class="fas fa-weight-hanging" style="margin-right: 8px;"></i>Coefficient</th>
+                                    <th><i class="fas fa-star" style="margin-right: 8px;"></i>Note</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php if (count($grades) > 0): ?>
                                     <?php foreach ($grades as $g): ?>
+                                        <?php
+                                        $note = floatval($g['note']);
+                                        $status = '';
+                                        $badgeClass = '';
+                                        if ($note >= 16) {
+                                            $status = 'Excellent';
+                                            $badgeClass = 'badge-success';
+                                        } elseif ($note >= 14) {
+                                            $status = 'Très Bien';
+                                            $badgeClass = 'badge-success';
+                                        } elseif ($note >= 12) {
+                                            $status = 'Bien';
+                                            $badgeClass = 'badge-warning';
+                                        } elseif ($note >= 10) {
+                                            $status = 'Passable';
+                                            $badgeClass = 'badge-warning';
+                                        } else {
+                                            $status = 'Insuffisant';
+                                            $badgeClass = 'badge-danger';
+                                        }
+                                        ?>
                                         <tr>
-                                            <td><?= htmlspecialchars($g['matiere']) ?></td>
-                                            <td>Semestre <?= $g['semestre'] ?></td>
-                                            <td><?= $g['coefficient'] ?></td>
-                                            <td><strong><?= $g['note'] ?></strong></td>
+                                            <td><i class="fas fa-book-open" style="margin-right: 8px; color: var(--secondary);"></i><?= htmlspecialchars($g['matiere']) ?></td>
+                                            <td><i class="fas fa-calendar-alt" style="margin-right: 8px; color: var(--text-light);"></i>Semestre <?= $g['semestre'] ?></td>
+                                            <td><i class="fas fa-weight-hanging" style="margin-right: 8px; color: var(--text-light);"></i><?= $g['coefficient'] ?></td>
+                                            <td>
+                                                <strong style="font-size: 1.1em;"><?= $g['note'] ?>/20</strong>
+                                                <span class="badge <?= $badgeClass ?>" style="margin-left: 10px;"><?= $status ?></span>
+                                            </td>
                                         </tr>
                                     <?php endforeach; ?>
                                 <?php else: ?>
                                     <tr>
-                                        <td colspan="4" style="text-align:center;">Aucune note n'a été saisie pour le moment.</td>
+                                        <td colspan="4" style="text-align:center; padding: 40px;">
+                                            <i class="fas fa-inbox" style="font-size: 2em; color: var(--text-light); margin-bottom: 10px;"></i><br>
+                                            Aucune note n'a été saisie pour le moment.
+                                        </td>
                                     </tr>
                                 <?php endif; ?>
                             </tbody>
@@ -277,21 +293,24 @@ $professors = $teacherModel->getProfessorsByClasse($id_classe)->fetchAll(PDO::FE
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Professeur</th>
-                                    <th>Matière</th>
+                                    <th><i class="fas fa-user-graduate" style="margin-right: 8px;"></i>Professeur</th>
+                                    <th><i class="fas fa-chalkboard-teacher" style="margin-right: 8px;"></i>Matière</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php if (count($professors) > 0): ?>
                                     <?php foreach ($professors as $p): ?>
                                         <tr>
-                                            <td><?= htmlspecialchars($p['nom'] . ' ' . $p['prenom']) ?></td>
-                                            <td><?= htmlspecialchars($p['matiere_nom']) ?></td>
+                                            <td><i class="fas fa-user-graduate" style="margin-right: 8px; color: var(--secondary);"></i><?= htmlspecialchars($p['nom'] . ' ' . $p['prenom']) ?></td>
+                                            <td><i class="fas fa-chalkboard-teacher" style="margin-right: 8px; color: var(--text-light);"></i><?= htmlspecialchars($p['matiere_nom']) ?></td>
                                         </tr>
                                     <?php endforeach; ?>
                                 <?php else: ?>
                                     <tr>
-                                        <td colspan="2" style="text-align:center;">Aucun professeur affecté.</td>
+                                        <td colspan="2" style="text-align:center; padding: 40px;">
+                                            <i class="fas fa-users" style="font-size: 2em; color: var(--text-light); margin-bottom: 10px;"></i><br>
+                                            Aucun professeur affecté.
+                                        </td>
                                     </tr>
                                 <?php endif; ?>
                             </tbody>
@@ -301,21 +320,24 @@ $professors = $teacherModel->getProfessorsByClasse($id_classe)->fetchAll(PDO::FE
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Nom</th>
-                                    <th>Prénom</th>
+                                    <th><i class="fas fa-user" style="margin-right: 8px;"></i>Nom</th>
+                                    <th><i class="fas fa-user-friends" style="margin-right: 8px;"></i>Prénom</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php if (count($classmates) > 0): ?>
                                     <?php foreach ($classmates as $c): ?>
                                         <tr>
-                                            <td><?= htmlspecialchars($c['nom']) ?></td>
-                                            <td><?= htmlspecialchars($c['prenom']) ?></td>
+                                            <td><i class="fas fa-user" style="margin-right: 8px; color: var(--secondary);"></i><?= htmlspecialchars($c['nom']) ?></td>
+                                            <td><i class="fas fa-user-friends" style="margin-right: 8px; color: var(--text-light);"></i><?= htmlspecialchars($c['prenom']) ?></td>
                                         </tr>
                                     <?php endforeach; ?>
                                 <?php else: ?>
                                     <tr>
-                                        <td colspan="2" style="text-align:center;">Aucun camarade.</td>
+                                        <td colspan="2" style="text-align:center; padding: 40px;">
+                                            <i class="fas fa-user-friends" style="font-size: 2em; color: var(--text-light); margin-bottom: 10px;"></i><br>
+                                            Aucun camarade.
+                                        </td>
                                     </tr>
                                 <?php endif; ?>
                             </tbody>

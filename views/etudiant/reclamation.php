@@ -24,6 +24,7 @@ $initials = strtoupper(substr($profile['prenom'], 0, 1) . substr($profile['nom']
     <title>Réclamation - SIGES</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css">
     <link rel="stylesheet" href="../../assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 
 <body>
@@ -51,36 +52,24 @@ $initials = strtoupper(substr($profile['prenom'], 0, 1) . substr($profile['nom']
                 <a href="reclamation.php" class="active">Réclamation</a>
             </nav>
 
-            <a href="../../controllers/Logout.php" class="logout-btn"><i class='bx bx-log-out'></i>Déconnexion</a>
+            <a href="../../controllers/Logout.php" class="logout-btn" style="background-color: #f02c16; font-weight: bold;"><i class='bx bx-log-out'></i>Déconnexion</a>
         </aside>
 
         <main class="student-main">
-              <div class="header-user-card">
-                    <strong>Bonjour, <?= htmlspecialchars($profile['prenom']) ?></strong>
-                    <span>En attente de réclamation</span>
-                </div>
-            <section class="page-header">
+            <section class="page-header page-header-reclamation">
                 <div>
                     <p class="eyebrow">Réclamation</p>
                     <h1>Signaler une note</h1>
                     <p>Soumettez une demande de vérification directement depuis votre espace étudiant.</p>
                     <div class="room-banner">
-                        <span class="badge room-badge">Salle fixe</span>
+                        <span class="badge room-badge" style="color: #F29100; background: rgba(242, 145, 0, 0.12);">Salle fixe</span>
                         <strong>Salle S-12 • Bâtiment principal</strong>
                     </div>
                 </div>
-              
-            </section>
 
-            <section class="tools-bar">
-                <div class="search-box">
-                    <input type="text" placeholder="Rechercher une note ou un cours">
-                    <button type="button">Rechercher</button>
-                </div>
-                <div class="filter-chips">
-                    <span class="filter-chip active">Toutes les réclamations</span>
-                    <span class="filter-chip">Dernières notes</span>
-                    <span class="filter-chip">Prioritaires</span>
+                <div class="header-user-card">
+                    <strong>Bonjour, <?= htmlspecialchars($profile['prenom']) ?></strong>
+                    <span>En attente de réclamation</span>
                 </div>
             </section>
 
@@ -95,22 +84,40 @@ $initials = strtoupper(substr($profile['prenom'], 0, 1) . substr($profile['nom']
                     <form class="reclamation-form" action="../../controllers/GradeController.php" method="POST">
                         <input type="hidden" name="action" value="submit_reclamation">
                         
-                        <div class="form-group">
-                            <label for="evaluation"><i class='bx bx-book-open'></i>Matière / Évaluation</label>
-                            <select id="evaluation" name="id_evaluation" required>
-                                <option value="">-- Sélectionnez une évaluation --</option>
-                                <?php foreach ($grades as $grade): ?>
-                                    <option value="<?= $grade['Id_Evaluation'] ?>"><?= htmlspecialchars($grade['matiere']) ?> — Semestre <?= $grade['semestre'] ?> (Note : <?= $grade['note'] ?>/20)</option>
-                                <?php endforeach; ?>
-                            </select>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="evaluation"><i class='bx bx-book-open'></i>Matière / Évaluation</label>
+                                <select id="evaluation" name="id_evaluation" required>
+                                    <option value="">-- Sélectionnez une évaluation --</option>
+                                    <?php foreach ($grades as $grade): ?>
+                                        <option value="<?= $grade['Id_Evaluation'] ?>"><?= htmlspecialchars($grade['matiere']) ?> — Semestre <?= $grade['semestre'] ?> (Note : <?= $grade['note'] ?>/20)</option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="type"><i class='bx bx-category'></i>Type de réclamation</label>
+                                <select id="type" name="type_reclamation" required>
+                                    <option value="">-- Sélectionnez un type --</option>
+                                    <option value="erreur_saisie">Erreur de saisie</option>
+                                    <option value="mauvais_bareme">Mauvais barème</option>
+                                    <option value="matieres_incorrecte">Matière incorrecte</option>
+                                    <option value="autre">Autre</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group form-full">
+                                <label for="motif"><i class='bx bx-notepad'></i>Motif de la réclamation</label>
+                                <textarea id="motif" name="motif" placeholder="Expliquez en détail pourquoi vous demandez une vérification..." required></textarea>
+                            </div>
                         </div>
 
-                        <div class="form-group">
-                            <label for="motif"><i class='bx bx-notepad'></i>Motif de la réclamation</label>
-                            <textarea id="motif" name="motif" placeholder="Expliquez en détail pourquoi vous demandez une vérification..." required></textarea>
+                        <div class="form-hint">
+                            <strong>Conseil :</strong>
+                            <p>Donnez des informations claires et précises. Mentionnez la date de l’évaluation, le semestre et toute erreur détectée dans le barème ou le calcul.</p>
                         </div>
 
-                        <button type="submit" class="button-success"><i class='bx bx-send'></i>Envoyer ma demande</button>
+                        <button type="submit" class="button-success" style="font-weight: bold;"><i class='bx bx-send'></i>Envoyer ma demande</button>
                     </form>
                 <?php else: ?>
                     <div class="empty-state">
