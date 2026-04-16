@@ -96,7 +96,7 @@ $professors = $teacherModel->getProfessorsByClasse($id_classe)->fetchAll(PDO::FE
         <main class="student-main">
 
             <section class="page-header page-header-dashboard">
-                 
+
                 <div>
                     <p class="eyebrow">Dashboard étudiant</p>
                     <h1>Mes notes et ressources</h1>
@@ -111,7 +111,7 @@ $professors = $teacherModel->getProfessorsByClasse($id_classe)->fetchAll(PDO::FE
                     <strong> Bonjour, <?= htmlspecialchars($studentData['prenom']) ?></strong>
                     <span>Bienvenue sur votre espace</span>
                 </div>
-              
+
             </section>
 
             <section class="stats-grid">
