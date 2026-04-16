@@ -510,6 +510,18 @@ button, input, textarea, select {
     margin: 0 0 18px;
     font-size: 1.4rem;
     color: var(--primary);
+    font-weight: 700;
+}
+
+.section-block .section-title-row h2,
+.chart-card h2,
+.stat-card h3,
+.course-card h3,
+.table-card td strong,
+.table-card .badge,
+.sidebar-section h3 {
+    font-weight: 700;
+    color: var(--text);
 }
 
 .section-title-row {
@@ -541,7 +553,7 @@ button, input, textarea, select {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    color: #1A3C5A;
+    color: var(--text);
 }
 
 .stat-card:nth-child(1) {
@@ -611,7 +623,7 @@ button, input, textarea, select {
     background: white;
     border-radius: 24px;
     padding: 28px 20px;
-    color: #1A3C5A;
+    color: var(--text);
     text-align: left;
     box-shadow: var(--shadow-md);
     transition: all 0.3s ease;
@@ -644,8 +656,9 @@ button, input, textarea, select {
 
 .course-card p {
     margin: 0;
-    font-size: 0.85rem;
-    opacity: 0.9;
+    font-size: 0.9rem;
+    color: var(--text-light);
+    font-weight: 600;
 }
 
 /* ============================================
@@ -679,6 +692,7 @@ button, input, textarea, select {
     flex-direction: row;
     min-height: 180px;
     transition: all 0.25s ease;
+    color: white;
 }
 
 .video-thumb {
@@ -1172,21 +1186,22 @@ button, input, textarea, select {
 .reclamation-form select {
     width: 100%;
     padding: 14px 16px;
-    border-radius: 18px;
-    border: 1px solid #d9e2ef;
-    background: #f8fafc;
+    border-radius: 16px;
+    border: 1px solid rgba(34, 42, 62, 0.1);
+    background: #ffffff;
     color: var(--text);
     outline: none;
     font-size: 0.95rem;
-    transition: all 0.2s ease;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: inset 0 1px 2px rgba(16, 24, 40, 0.04);
 }
 
 .reclamation-form input:focus,
 .reclamation-form textarea:focus,
 .reclamation-form select:focus {
     border-color: var(--secondary);
-    background: var(--white);
-    box-shadow: 0 0 0 3px rgba(46, 134, 171, 0.1);
+    background: #ffffff;
+    box-shadow: 0 0 0 4px rgba(46, 134, 171, 0.08);
 }
 
 .reclamation-form textarea {
@@ -1197,6 +1212,17 @@ button, input, textarea, select {
 .reclamation-form button {
     width: fit-content;
     min-width: 180px;
+    border: none;
+    border-radius: 18px;
+    background: var(--primary);
+    color: #ffffff;
+    box-shadow: none;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.reclamation-form button:hover {
+    background: var(--secondary);
+    transform: translateY(0);
 }
 
 .schedule-table {
@@ -1561,7 +1587,7 @@ button, input, textarea, select {
 
 /* Second form with different gradient */
 .teacher-form-box:nth-child(2) {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    background: #eff7ff;
 }
 
 .teacher-form-box:nth-child(2) button {

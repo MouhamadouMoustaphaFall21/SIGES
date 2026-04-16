@@ -57,6 +57,27 @@ foreach ($performanceBySubject as $matiere => &$data) {
     }
 }
 
+$subjectLabels = array_keys($performanceBySubject);
+$averageGrades = array_map(fn($data) => $data['moyenne'], $performanceBySubject);
+$noteDistributionLabels = ['0-5', '5-10', '10-15', '15-18', '18-20'];
+$noteDistribution = array_fill(0, count($noteDistributionLabels), 0);
+foreach ($grades as $grade) {
+    $note = floatval($grade['note']);
+    if ($note >= 0) {
+        if ($note <= 5) {
+            $noteDistribution[0]++;
+        } elseif ($note <= 10) {
+            $noteDistribution[1]++;
+        } elseif ($note <= 15) {
+            $noteDistribution[2]++;
+        } elseif ($note <= 18) {
+            $noteDistribution[3]++;
+        } else {
+            $noteDistribution[4]++;
+        }
+    }
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -67,6 +88,7 @@ foreach ($performanceBySubject as $matiere => &$data) {
     <title>Mes Performances - SIGES</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css">
     <link rel="stylesheet" href="../../assets/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
@@ -115,6 +137,17 @@ foreach ($performanceBySubject as $matiere => &$data) {
             <section class="section-block">
                 <div class="section-title-row">
                     <h2>Résultats par matière</h2>
+                </div>
+
+                <div class="chart-grid">
+                    <div class="chart-card">
+                        <h2>Moyenne par matière</h2>
+                        <canvas id="subjectAverageChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h2>Histogramme des notes</h2>
+                        <canvas id="noteHistogramChart"></canvas>
+                    </div>
                 </div>
 
                 <div class="table-card">
@@ -168,6 +201,72 @@ foreach ($performanceBySubject as $matiere => &$data) {
             </section>
         </main>
     </div>
+    <script>
+        const subjectLabels = <?= json_encode($subjectLabels) ?>;
+        const averageGrades = <?= json_encode($averageGrades) ?>;
+        const noteBuckets = <?= json_encode($noteDistributionLabels) ?>;
+        const noteCounts = <?= json_encode($noteDistribution) ?>;
+
+        new Chart(document.getElementById('subjectAverageChart'), {
+            type: 'bar',
+            data: {
+                labels: subjectLabels,
+                datasets: [{
+                    label: 'Moyenne',
+                    data: averageGrades,
+                    backgroundColor: 'rgba(46, 134, 171, 0.75)',
+                    borderColor: 'rgba(26, 60, 90, 0.9)',
+                    borderWidth: 1,
+                    borderRadius: 12,
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 20,
+                        ticks: { stepSize: 2 }
+                    }
+                }
+            }
+        });
+
+        new Chart(document.getElementById('noteHistogramChart'), {
+            type: 'bar',
+            data: {
+                labels: noteBuckets,
+                datasets: [{
+                    label: 'Nombre de notes',
+                    data: noteCounts,
+                    backgroundColor: 'rgba(242, 145, 0, 0.75)',
+                    borderColor: 'rgba(242, 145, 0, 1)',
+                    borderWidth: 1,
+                    borderRadius: 12,
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: context => context.parsed.y + ' note(s)'
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { precision: 0 }
+                    }
+                }
+            }
+        });
+    </script>
 </body>
 
 </html>

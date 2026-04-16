@@ -138,21 +138,6 @@ $averageCalculated = $totalCoeffs > 0 ? round($totalPoints / $totalCoeffs, 2) : 
                         </tbody>
                     </table>
                 </div>
-
-                <div class="stats-grid" style="margin-top: 24px;">
-                    <article class="stat-card">
-                        <h3>Moyenne pondérée</h3>
-                        <p class="stat-value"><?= $averageCalculated ?> / 20</p>
-                    </article>
-                    <article class="stat-card">
-                        <h3>Rang dans la classe</h3>
-                        <p class="stat-value"><?= $rang ?> / <?= count($classement) ?></p>
-                    </article>
-                    <article class="stat-card">
-                        <h3>Total coefficients</h3>
-                        <p class="stat-value"><?= $totalCoeffs ?></p>
-                    </article>
-                </div>
             </section>
         </main>
     </div>

@@ -124,19 +124,19 @@ foreach ($teacherSummary as $item) {
 
             <section class="stats-grid">
                 <article class="stat-card">
-                    <h3>Classes affectées</h3>
-                    <p class="stat-value"><?= count($classes) ?></p>
-                    <span class="badge badge-soft">Total</span>
+                    <h3  style="color: white;">Classes affectées</h3>
+                    <p class="stat-value"  style="color: white;"><?= count($classes) ?></p>
+                    <span class="badge badge-soft"  style="color: white;">Total</span>
                 </article>
                 <article class="stat-card">
-                    <h3>Évaluations créées</h3>
-                    <p class="stat-value"><?= count($evaluations) ?></p>
-                    <span class="badge badge-soft">Dernières</span>
+                    <h3  style="color: white;">Évaluations créées</h3>
+                    <p class="stat-value"  style="color: white;"><?= count($evaluations) ?></p>
+                    <span class="badge badge-soft"  style="color: white;">Dernières</span>
                 </article>
                 <article class="stat-card">
-                    <h3>Taux de réussite</h3>
-                    <p class="stat-value"><?= count($chartSuccess) ? round(array_sum($chartSuccess) / count($chartSuccess), 1) : 0 ?>%</p>
-                    <span class="badge badge-success">Moyenne</span>
+                    <h3  style="color: white;">Taux de réussite</h3>
+                    <p class="stat-value"  style="color: white;"><?= count($chartSuccess) ? round(array_sum($chartSuccess) / count($chartSuccess), 1) : 0 ?>%</p>
+                    <span class="badge badge-success"  style="color: white;">Moyenne</span>
                 </article>
             </section>
 

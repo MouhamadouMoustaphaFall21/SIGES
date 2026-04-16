@@ -116,21 +116,21 @@ $professors = $teacherModel->getProfessorsByClasse($id_classe)->fetchAll(PDO::FE
 
             <section class="stats-grid">
                 <article class="stat-card">
-                    <h3>Moyenne Générale</h3>
-                    <p class="stat-value"><?= $moyenneGenerale ?> / 20</p>
-                    <span class="video-meta badge <?= ($moyenneGenerale >= 10) ? 'tag-success' : 'tag-danger' ?>">
+                    <h3  style="color: white;">Moyenne Générale</h3>
+                    <p class="stat-value"  style="color: white;"><?= $moyenneGenerale ?> / 20</p>
+                    <span class="video-meta badge <?= ($moyenneGenerale >= 10) ? 'tag-success' : 'tag-danger' ?>"  style="color: white;">
                         <?= ($moyenneGenerale >= 10) ? 'ADMIS' : 'AJOURNÉ' ?>
                     </span>
                 </article>
                 <article class="stat-card">
-                    <h3>Rang</h3>
-                    <p class="stat-value"><?= $rang ?> / <?= count($classement) ?></p>
-                    <span class="video-meta badge">Classe</span>
+                    <h3  style="color: white;">Rang</h3>
+                    <p class="stat-value"  style="color: white;"><?= $rang ?> / <?= count($classement) ?></p>
+                    <span class="video-meta badge"  style="color: white;">Classe</span>
                 </article>
                 <article class="stat-card">
-                    <h3>Professeurs</h3>
-                    <p class="stat-value"><?= count($professors) ?></p>
-                    <span class="video-meta badge">Actifs</span>
+                    <h3  style="color: white;">Professeurs</h3>
+                    <p class="stat-value"  style="color: white;"><?= count($professors) ?></p>
+                    <span class="video-meta badge"  style="color: white;">Actifs</span>
                 </article>
             </section>
 
