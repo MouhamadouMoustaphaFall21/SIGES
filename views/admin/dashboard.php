@@ -22,13 +22,25 @@ $stats = [];
 $stats['etudiants'] = $db->query("SELECT COUNT(*) FROM etudiant")->fetchColumn();
 $stats['professeurs'] = $db->query("SELECT COUNT(*) FROM professeur")->fetchColumn();
 $stats['classes'] = $db->query("SELECT COUNT(*) FROM classe")->fetchColumn();
+$stats['matieres'] = $db->query("SELECT COUNT(*) FROM matiere")->fetchColumn();
+$stats['evaluations'] = $db->query("SELECT COUNT(*) FROM evaluation")->fetchColumn();
+$stats['notes'] = $db->query("SELECT COUNT(*) FROM effectue")->fetchColumn();
+
+// Statistiques avancées
+$stats['moyenne_generale'] = $db->query("SELECT AVG(note) FROM effectue WHERE note IS NOT NULL")->fetchColumn();
+$stats['taux_reussite'] = $db->query("SELECT (COUNT(CASE WHEN note >= 10 THEN 1 END) * 100.0 / COUNT(*)) FROM effectue WHERE note IS NOT NULL")->fetchColumn();
+$stats['notes_saisies'] = $db->query("SELECT COUNT(*) FROM effectue WHERE note IS NOT NULL")->fetchColumn();
+$stats['affectations'] = $db->query("SELECT COUNT(*) FROM affecter")->fetchColumn();
 
 // 3. Calcul de la moyenne par classe (Performance globale)
 $queryClasses = "SELECT c.Id_Classe, c.libelle, c.niveau,
                  (SELECT AVG(eff.note) 
                   FROM effectue eff 
                   JOIN etudiant e ON eff.id_Etudiant = e.id_Etudiant 
-                  WHERE e.Id_Classe = c.Id_Classe) as moyenne_classe
+                  WHERE e.Id_Classe = c.Id_Classe) as moyenne_classe,
+                 (SELECT COUNT(DISTINCT e.id_Etudiant)
+                  FROM etudiant e
+                  WHERE e.Id_Classe = c.Id_Classe) as nb_etudiants
                  FROM classe c";
 $stmtClasses = $db->prepare($queryClasses);
 $stmtClasses->execute();
@@ -41,162 +53,127 @@ $classesPerformance = $stmtClasses->fetchAll(PDO::FETCH_ASSOC);
 <head>
     <meta charset="UTF-8">
     <title>Administration - SIGES</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background-color: #f0f2f5;
-            margin: 0;
-            padding: 20px;
-        }
-
-        .admin-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            text-align: center;
-        }
-
-        .stat-card h2 {
-            margin: 0;
-            color: #007bff;
-            font-size: 32px;
-        }
-
-        .stat-card p {
-            margin: 5px 0 0;
-            color: #666;
-            text-transform: uppercase;
-            font-size: 12px;
-        }
-
-        .main-section {
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        }
-
-        .header-flex {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th,
-        td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #edf2f7;
-        }
-
-        th {
-            background: #f8f9fa;
-            color: #4a5568;
-        }
-
-        .badge {
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .badge-success {
-            background: #c6f6d5;
-            color: #22543d;
-        }
-
-        .badge-warning {
-            background: #feebc8;
-            color: #744210;
-        }
-
-        .logout-btn {
-            background: #e53e3e;
-            color: white;
-            text-decoration: none;
-            padding: 8px 15px;
-            border-radius: 5px;
-            font-size: 14px;
-        }
-    </style>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css">
 </head>
 
 <body>
+    <div class="student-shell">
+        <aside class="student-sidebar">
+            <div class="sidebar-brand">
+                <img src="../../assets/img/logo_simple-SAP.png" alt="SIGES logo">
+                <div class="brand-title">
+                    <strong>SIGES</strong>
+                    <span>Espace Admin</span>
+                </div>
+            </div>
 
-    <div class="header-flex">
-        <h1>Tableau de Bord Administrateur</h1>
-        <a href="../../controllers/Logout.php" class="logout-btn">Déconnexion</a>
+            <nav class="sidebar-nav">
+                <a href="dashboard.php" class="active"><i class='bx bx-home'></i>Dashboard</a>
+                <a href="users.php"><i class='bx bx-user-circle'></i>Gestion utilisateurs</a>
+                <a href="grades_view.php"><i class='bx bx-book'></i>PV Délibération</a>
+                <a href="schedule.php"><i class='bx bx-calendar'></i>Emploi du temps</a>
+            </nav>
+
+            <a href="../../controllers/Logout.php" class="logout-btn"><i class='bx bx-log-out'></i>Déconnexion</a>
+        </aside>
+
+        <main class="student-main">
+            <section class="page-header page-header-dashboard">
+                <div>
+                    <p class="eyebrow">Administration</p>
+                    <h1>Tableau de bord</h1>
+                    <p>Vue globale des étudiants, des enseignants, des classes et des performances scolaires.</p>
+                </div>
+                <div class="header-user-card">
+                    <strong>Administrateur</strong>
+                    <span>Gestion centrale</span>
+                </div>
+            </section>
+
+            <section class="stats-grid">
+                <article class="stat-card">
+                    <h3><i class='bx bx-user'></i> Étudiants inscrits</h3>
+                    <p class="stat-value"><?= $stats['etudiants'] ?></p>
+                    <span class="badge badge-soft">Total</span>
+                </article>
+                <article class="stat-card">
+                    <h3><i class='bx bx-chalkboard'></i> Enseignants</h3>
+                    <p class="stat-value"><?= $stats['professeurs'] ?></p>
+                    <span class="badge badge-soft">Actifs</span>
+                </article>
+                <article class="stat-card">
+                    <h3><i class='bx bx-building-house'></i> Classes actives</h3>
+                    <p class="stat-value"><?= $stats['classes'] ?></p>
+                    <span class="badge badge-soft">Promotions</span>
+                </article>
+                <article class="stat-card">
+                    <h3><i class='bx bx-book'></i> Matières</h3>
+                    <p class="stat-value"><?= $stats['matieres'] ?></p>
+                    <span class="badge badge-soft">Enseignées</span>
+                </article>
+                <article class="stat-card">
+                    <h3><i class='bx bx-bar-chart-alt-2'></i> Moyenne générale</h3>
+                    <p class="stat-value"><?= $stats['moyenne_generale'] ? round($stats['moyenne_generale'], 1) : 'N/A' ?>/20</p>
+                    <span class="badge badge-success">Établissement</span>
+                </article>
+                <article class="stat-card">
+                    <h3><i class='bx bx-trophy'></i> Taux de réussite</h3>
+                    <p class="stat-value"><?= $stats['taux_reussite'] ? round($stats['taux_reussite'], 1) : 0 ?>%</p>
+                    <span class="badge badge-success">Global</span>
+                </article>
+                <article class="stat-card">
+                    <h3><i class='bx bx-calendar-check'></i> Évaluations créées</h3>
+                    <p class="stat-value"><?= $stats['evaluations'] ?></p>
+                    <span class="badge badge-soft">Total</span>
+                </article>
+                <article class="stat-card">
+                    <h3><i class='bx bx-edit-alt'></i> Notes saisies</h3>
+                    <p class="stat-value"><?= $stats['notes_saisies'] ?></p>
+                    <span class="badge badge-soft">Validées</span>
+                </article>
+            </section>
+
+            <section class="section-block">
+                <div class="section-title-row">
+                    <h2>Performance par classe</h2>
+                </div>
+
+                <div class="table-card">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Classe</th>
+                                <th>Niveau</th>
+                                <th>Étudiants</th>
+                                <th>Moyenne globale</th>
+                                <th>Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($classesPerformance as $cp): ?>
+                                <tr>
+                                    <td><strong><?= htmlspecialchars($cp['libelle']) ?></strong></td>
+                                    <td><?= htmlspecialchars($cp['niveau']) ?></td>
+                                    <td><?= $cp['nb_etudiants'] ?? 0 ?></td>
+                                    <td><?= $cp['moyenne_classe'] ? round($cp['moyenne_classe'], 2) : 'N/A' ?> / 20</td>
+                                    <td>
+                                        <?php if (!$cp['moyenne_classe']): ?>
+                                            <span class="badge badge-soft">Pas de notes</span>
+                                        <?php elseif ($cp['moyenne_classe'] >= 10): ?>
+                                            <span class="badge badge-success">Satisfaisant</span>
+                                        <?php else: ?>
+                                            <span class="badge badge-warning">À surveiller</span>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
     </div>
-
-    <nav style="background: #007bff; color: white; padding: 10px; border-radius: 8px; margin-bottom: 20px;">
-        <a href="dashboard.php" style="color: white; margin-right: 20px; text-decoration: none;">Dashboard</a>
-        <a href="users.php" style="color: white; margin-right: 20px; text-decoration: none;">Gestion Utilisateurs</a>
-        <a href="grades_view.php" style="color: white; margin-right: 20px; text-decoration: none;">PV Délibération</a>
-        <a href="schedule.php" style="color: white; text-decoration: none;">Emploi du Temps</a>
-    </nav>
-
-    <div class="admin-grid">
-        <div class="stat-card">
-            <h2><?= $stats['etudiants'] ?></h2>
-            <p>Étudiants inscrits</p>
-        </div>
-        <div class="stat-card">
-            <h2><?= $stats['professeurs'] ?></h2>
-            <p>Enseignants</p>
-        </div>
-        <div class="stat-card">
-            <h2><?= $stats['classes'] ?></h2>
-            <p>Classes actives</p>
-        </div>
-    </div>
-
-    <div class="main-section">
-        <h3>Performance par Classe</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Classe</th>
-                    <th>Niveau</th>
-                    <th>Moyenne Globale</th>
-                    <th>Statut</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($classesPerformance as $cp): ?>
-                    <tr>
-                        <td><strong><?= htmlspecialchars($cp['libelle']) ?></strong></td>
-                        <td><?= $cp['niveau'] ?></td>
-                        <td><?= $cp['moyenne_classe'] ? round($cp['moyenne_classe'], 2) : 'N/A' ?> / 20</td>
-                        <td>
-                            <?php if (!$cp['moyenne_classe']): ?>
-                                <span class="badge">Pas de notes</span>
-                            <?php elseif ($cp['moyenne_classe'] >= 10): ?>
-                                <span class="badge badge-success">Satisfaisant</span>
-                            <?php else: ?>
-                                <span class="badge badge-warning">À surveiller</span>
-                            <?php endif; ?>
-                        </td>
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    </div>
-
 </body>
 
 </html>

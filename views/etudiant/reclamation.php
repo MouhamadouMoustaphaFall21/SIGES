@@ -47,12 +47,14 @@ $initials = strtoupper(substr($profile['prenom'], 0, 1) . substr($profile['nom']
             </div>
 
             <nav class="sidebar-nav">
-                <a href="dashboard.php">Dashboard</a>
-                <a href="schedule.php">Emploi du Temps</a>
-                <a href="reclamation.php" class="active">Réclamation</a>
+                <a href="dashboard.php"><i class='bx bx-grid-alt'></i>Dashboard</a>
+                <a href="performances.php"><i class='bx bx-bar-chart-alt-2'></i>Mes performances</a>
+                <a href="schedule.php"><i class='bx bx-calendar'></i>Emploi du Temps</a>
+                <a href="reclamation.php" class="active"><i class='bx bx-message-square-detail'></i>Réclamation</a>
+                <a href="bulletin.php"><i class='bx bx-file'></i>Bulletin</a>
             </nav>
 
-            <a href="../../controllers/Logout.php" class="logout-btn" style="background-color: #f02c16; font-weight: bold;"><i class='bx bx-log-out'></i>Déconnexion</a>
+            <a href="../../controllers/Logout.php" class="logout-btn"><i class='bx bx-log-out'></i>Déconnexion</a>
         </aside>
 
         <main class="student-main">

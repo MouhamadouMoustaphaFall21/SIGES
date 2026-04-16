@@ -86,6 +86,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         exit();
     }
 
+    // Cas : Ajout d'une matière
+    if ($_POST['action'] === 'add_subject') {
+        $libelle = $_POST['libelle'];
+        $coefficient = $_POST['coefficient'];
+
+        $query = "INSERT INTO matiere (libelle, coefficient) VALUES (:lib, :coef)";
+        $stmt = $db->prepare($query);
+        $stmt->execute(['lib' => $libelle, 'coef' => $coefficient]);
+
+        header("Location: ../views/admin/users.php?msg=success");
+        exit();
+    }
+
+    // Cas : Affectation d'un professeur à une classe
+    if ($_POST['action'] === 'assign_professor') {
+        $id_professeur = $_POST['id_professeur'];
+        $id_classe = $_POST['id_classe'];
+
+        $query = "INSERT INTO affecter (Id_Professeur, Id_Classe) VALUES (:id_p, :id_c)";
+        $stmt = $db->prepare($query);
+        $stmt->execute(['id_p' => $id_professeur, 'id_c' => $id_classe]);
+
+        header("Location: ../views/admin/users.php?msg=success");
+        exit();
+    }
+
     // Action : Suppression d'un utilisateur
     if ($_POST['action'] === 'delete_user') {
         $login = $_POST['login'];

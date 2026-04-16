@@ -37,36 +37,78 @@ $students = $studentModel->getByClasse($id_classe)->fetchAll(PDO::FETCH_ASSOC);
 <head>
     <meta charset="UTF-8">
     <title>Élèves de la Classe - SIGES</title>
-    <style>
-        body { font-family: Arial, sans-serif; background: #f4f4f4; padding: 20px; }
-        .container { background: white; padding: 20px; border-radius: 8px; max-width: 800px; margin: auto; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
-        th { background: #007bff; color: white; }
-    </style>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css">
 </head>
 <body>
-    <div class="container">
-        <a href="dashboard.php">← Retour au dashboard</a>
-        <h2>Élèves de la Classe</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Nom</th>
-                    <th>Prénom</th>
-                    <th>Email</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($students as $s): ?>
-                    <tr>
-                        <td><?= htmlspecialchars($s['nom']) ?></td>
-                        <td><?= htmlspecialchars($s['prenom']) ?></td>
-                        <td><?= htmlspecialchars($s['login']) ?></td>
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
+    <div class="student-shell">
+        <aside class="student-sidebar">
+            <div class="sidebar-brand">
+                <img src="../../assets/img/logo_simple-SAP.png" alt="SIGES logo">
+                <div class="brand-title">
+                    <strong>SIGES</strong>
+                    <span>Espace Enseignant</span>
+                </div>
+            </div>
+
+            <div class="profile-box">
+                <div class="profile-avatar"><?= htmlspecialchars(strtoupper(substr($profData['prenom'], 0, 1) . substr($profData['nom'], 0, 1))) ?></div>
+                <div class="profile-info">
+                    <h2><?= htmlspecialchars($profData['prenom'] . ' ' . $profData['nom']) ?></h2>
+                    <p><?= htmlspecialchars($profData['nom_matiere']) ?></p>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="dashboard.php"><i class='bx bx-grid-alt'></i>Dashboard</a>
+                <a href="grades_entry.php?id_classe=<?= $id_classe ?>"><i class='bx bx-edit'></i>Saisir notes</a>
+                <a href="view_students.php?id_classe=<?= $id_classe ?>" class="active"><i class='bx bx-group'></i>Mes élèves</a>
+                <a href="view_grades.php?id_classe=<?= $id_classe ?>"><i class='bx bx-bar-chart-alt-2'></i>Classement</a>
+            </nav>
+
+            <a href="../../controllers/Logout.php" class="logout-btn"><i class='bx bx-log-out'></i>Déconnexion</a>
+        </aside>
+
+        <main class="student-main">
+            <section class="page-header page-header-schedule">
+                <div>
+                    <p class="eyebrow">Liste des élèves</p>
+                    <h1>Classe <?= htmlspecialchars($id_classe) ?></h1>
+                    <p>Retrouvez ici les élèves inscrits dans votre classe.</p>
+                </div>
+                <div class="header-user-card">
+                    <strong><?= htmlspecialchars($profData['prenom'] . ' ' . $profData['nom']) ?></strong>
+                    <span><?= htmlspecialchars($profData['nom_matiere']) ?></span>
+                </div>
+            </section>
+
+            <section class="section-block">
+                <div class="section-title-row">
+                    <h2>Élèves de la classe</h2>
+                </div>
+
+                <div class="table-card">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nom</th>
+                                <th>Prénom</th>
+                                <th>Email</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($students as $s): ?>
+                                <tr>
+                                    <td><?= htmlspecialchars($s['nom']) ?></td>
+                                    <td><?= htmlspecialchars($s['prenom']) ?></td>
+                                    <td><?= htmlspecialchars($s['login']) ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
     </div>
 </body>
 </html>

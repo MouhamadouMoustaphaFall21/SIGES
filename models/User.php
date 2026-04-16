@@ -57,8 +57,11 @@ class User
 
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($row && $this->password === $row['password']) {
-            return $row;
+        if ($row) {
+            // Supporter les mots de passe stockés en clair dans l'ancien schéma
+            if ($this->password === $row['password'] || password_verify($this->password, $row['password'])) {
+                return $row;
+            }
         }
 
         return false;
