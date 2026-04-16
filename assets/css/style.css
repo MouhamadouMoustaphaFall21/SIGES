@@ -60,14 +60,13 @@ button, input, textarea, select {
 
 .student-sidebar {
     position: fixed;
-    left: 24px;
-    top: 24px;
-    bottom: 24px;
+    left: 0px;
+    top: 0px;
     width: 320px;
-    background: var(--primary);
-    border-radius: 32px;
-    box-shadow: var(--shadow-md);
-    padding: 32px 28px;
+    min-height: 100vh;
+    margin-top: 0px;
+    background: #1A3C5A;
+     padding: 20px;
     display: flex;
     flex-direction: column;
     gap: 24px;

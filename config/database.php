@@ -6,7 +6,7 @@
 class Database {
     // Paramètres de connexion
     private $host = "localhost";
-    private $db_name = "siges"; // Nom exact de la base dans ton script
+    private $db_name = "SIGES"; // Nom exact de la base dans ton script
     private $username = "root";
     private $password = ""; // À modifier selon ton environnement local (ex: 'root' sur Mac)
     public $conn;
