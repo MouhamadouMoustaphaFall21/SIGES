@@ -354,19 +354,14 @@ button, input, textarea, select {
 .header-user-card {
     display: flex;
     flex-direction: column;
-    align-items: flex-end;
-    gap: 8px;
-    padding: 18px 22px;
-    border-radius: 24px;
-    background: var(--white);
-    border: 1px solid var(--border-color);
-    box-shadow: var(--shadow-sm);
-    min-width: 240px;
+    gap: 2px;
+    padding: 1px 15px;
+    font-size: 20px;
 }
 
 .header-user-card p {
     margin: 0;
-    font-size: 0.85rem;
+    font-size: 18px;
     text-transform: uppercase;
     color: var(--secondary);
     letter-spacing: 0.08em;
@@ -375,13 +370,13 @@ button, input, textarea, select {
 
 .header-user-card strong {
     margin: 0;
-    font-size: 1.25rem;
     color: var(--primary);
+     font-size: 35px;
 }
 
 .header-user-card span {
     color: var(--text-light);
-    font-size: 0.9rem;
+    font-size: 25px
 }
 
 /* ============================================
@@ -430,7 +425,7 @@ button, input, textarea, select {
     padding: 10px 20px;
     border: none;
     border-radius: 999px;
-    background: var(--success);
+    background: #2E86AB;
     color: white;
     font-weight: 700;
     cursor: pointer;
@@ -479,7 +474,7 @@ button, input, textarea, select {
    ============================================ */
 
 .section-block {
-    background: var(--white);
+    background: #fefdfdd5;
     border-radius: 28px;
     border: 1px solid var(--border-color);
     box-shadow: var(--shadow-md);
@@ -512,12 +507,12 @@ button, input, textarea, select {
 }
 
 .stat-card {
-    background: var(--white);
+    background:#2E86AB;
     border: 1px solid var(--border-color);
     border-radius: 24px;
-    padding: 26px 24px;
+    padding: 24px 22px;
     box-shadow: var(--shadow-md);
-    min-height: 160px;
+    min-height: 150px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -527,7 +522,7 @@ button, input, textarea, select {
     margin: 0 0 14px;
     font-size: 0.95rem;
     letter-spacing: 0.02em;
-    color: var(--secondary);
+    color:white;
     font-weight: 700;
     text-transform: uppercase;
 }
@@ -535,31 +530,31 @@ button, input, textarea, select {
 .stat-card .stat-value {
     font-size: clamp(2rem, 3vw + 0.5rem, 2.8rem);
     margin: 0 0 12px;
-    color: var(--primary);
+    color: white;
     font-weight: 700;
 }
 
 .stat-card .badge {
     width: fit-content;
     padding: 6px 12px;
-    background: rgba(123, 104, 238, 0.12);
+    background: #2E86AB;
     border-radius: 999px;
-    color: var(--primary);
+    color: #1A3C5A;
     font-weight: 700;
-    font-size: 0.8rem;
+    font-size: 14px;
 }
 
 .courses-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 18px;
+    gap: 14px;
 }
 
 .course-card {
-    background: linear-gradient(135deg, var(--primary), #9B88D4);
+    background: white;
     border-radius: 24px;
     padding: 28px 20px;
-    color: white;
+    color: #1A3C5A;
     text-align: center;
     box-shadow: var(--shadow-md);
     transition: all 0.3s ease;

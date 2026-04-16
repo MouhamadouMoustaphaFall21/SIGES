@@ -33,7 +33,7 @@ $initials = strtoupper(substr($profile['prenom'], 0, 1) . substr($profile['nom']
                 <img src="../../assets/img/logo_simple-SAP.png" alt="SIGES logo">
                 <div class="brand-title">
                     <strong>SIGES</strong>
-                    <span>Système Étudiant</span>
+                    <span>Espace Étudiant</span>
                 </div>
             </div>
 
@@ -55,6 +55,10 @@ $initials = strtoupper(substr($profile['prenom'], 0, 1) . substr($profile['nom']
         </aside>
 
         <main class="student-main">
+              <div class="header-user-card">
+                    <strong>Bonjour, <?= htmlspecialchars($profile['prenom']) ?></strong>
+                    <span>En attente de réclamation</span>
+                </div>
             <section class="page-header">
                 <div>
                     <p class="eyebrow">Réclamation</p>
@@ -65,11 +69,7 @@ $initials = strtoupper(substr($profile['prenom'], 0, 1) . substr($profile['nom']
                         <strong>Salle S-12 • Bâtiment principal</strong>
                     </div>
                 </div>
-                <div class="header-user-card">
-                    <p>Bonjour</p>
-                    <strong><?= htmlspecialchars($profile['prenom']) ?></strong>
-                    <span>En attente de réclamation</span>
-                </div>
+              
             </section>
 
             <section class="tools-bar">

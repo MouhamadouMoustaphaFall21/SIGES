@@ -60,6 +60,7 @@ $professors = $teacherModel->getProfessorsByClasse($id_classe)->fetchAll(PDO::FE
     <title>Mon Dashboard - SIGES</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css">
     <link rel="stylesheet" href="../../assets/css/style.css">
+     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 
 <body>
@@ -69,7 +70,7 @@ $professors = $teacherModel->getProfessorsByClasse($id_classe)->fetchAll(PDO::FE
                 <img src="../../assets/img/logo_simple-SAP.png" alt="SIGES logo">
                 <div class="brand-title">
                     <strong>SIGES</strong>
-                    <span>Système Étudiant</span>
+                    <span>Espace Étudiant</span>
                 </div>
             </div>
 
@@ -91,38 +92,11 @@ $professors = $teacherModel->getProfessorsByClasse($id_classe)->fetchAll(PDO::FE
         </aside>
 
         <main class="student-main">
-            <section class="page-header">
-                <div>
-                    <p class="eyebrow">Dashboard étudiant</p>
-                    <h1>Mes notes et ressources</h1>
-                    <p>Consultez votre moyenne, votre rang, vos professeurs, vos camarades et les ressources vidéo recommandées dans un seul espace.</p>
-                    <div class="room-banner">
-                        <span class="badge room-badge">Salle fixe</span>
-                        <strong>Salle S-12 • Bâtiment principal</strong>
-                    </div>
-                </div>
-                <div class="header-user-card">
-                    <p>Bonjour</p>
-                    <strong><?= htmlspecialchars($studentData['prenom']) ?></strong>
+            <div class="header-user-card">
+                    <strong> Bonjour, <?= htmlspecialchars($studentData['prenom']) ?></strong>
                     <span>Bienvenue sur votre espace</span>
                 </div>
-            </section>
-
-            <section class="tools-bar">
-                <div class="search-box">
-                    <i class='bx bx-search'></i>
-                    <input type="text" placeholder="Rechercher un cours, une note ou un professeur">
-                    <button type="button"><i class='bx bx-search'></i>Rechercher</button>
-                </div>
-                <div class="filter-chips">
-                    <span class="filter-chip active">Tous (24)</span>
-                    <span class="filter-chip">Vidéos</span>
-                    <span class="filter-chip">Planning</span>
-                    <span class="filter-chip">Réclamation</span>
-                </div>
-            </section>
-
-            <section class="stats-grid">
+             <section class="stats-grid">
                 <article class="stat-card">
                     <h3>Moyenne Générale</h3>
                     <p class="stat-value"><?= $moyenneGenerale ?> / 20</p>
@@ -140,6 +114,33 @@ $professors = $teacherModel->getProfessorsByClasse($id_classe)->fetchAll(PDO::FE
                     <p class="stat-value"><?= count($professors) ?></p>
                     <span class="video-meta badge">Actifs</span>
                 </article>
+            </section>
+
+            <section class="page-header">
+                 
+                <div>
+                    <p class="eyebrow">Dashboard étudiant</p>
+                    <h1>Mes notes et ressources</h1>
+                    <p>Consultez votre moyenne, votre rang, vos professeurs, vos camarades et les ressources vidéo recommandées dans un seul espace.</p>
+                    <div class="room-banner">
+                        <span class="badge room-badge">Salle fixe</span>
+                        <strong>Salle S-12 • Bâtiment principal</strong>
+                    </div>
+                </div>
+              
+            </section>
+
+            <section class="tools-bar">
+                <div class="search-box">
+                    <i class='bx bx-search'></i>
+                    <input type="text" placeholder="Rechercher un cours, une note ou un professeur">
+                    <button type="button"><i class='bx bx-search'></i>Rechercher</button>
+                </div>
+                <div class="filter-chips">
+                    <span class="filter-chip active">Tous </span>
+                    <span class="filter-chip">Vidéos</span>
+                    <span class="filter-chip">Planning</span>
+                </div>
             </section>
 
             <section class="section-block">
@@ -198,32 +199,45 @@ $professors = $teacherModel->getProfessorsByClasse($id_classe)->fetchAll(PDO::FE
                 </div>
             </section>
 
-            <section class="section-block">
-                <h2>Mes Cours</h2>
-                <div class="courses-grid">
-                    <div class="course-card">
-                        <div class="course-icon">📐</div>
-                        <h3>Mathématiques</h3>
-                        <p>Algèbre & Géométrie</p>
-                    </div>
-                    <div class="course-card">
-                        <div class="course-icon">💻</div>
-                        <h3>Programmation Web</h3>
-                        <p>HTML, CSS, PHP</p>
-                    </div>
-                    <div class="course-card">
-                        <div class="course-icon">🗄️</div>
-                        <h3>Base de Données</h3>
-                        <p>SQL & Requêtes</p>
-                    </div>
-                    <div class="course-card">
-                        <div class="course-icon">🌍</div>
-                        <h3>Anglais Technique</h3>
-                        <p>Vocabulaire IT</p>
-                    </div>
-                </div>
-            </section>
+          <section class="section-block">
+    <h2>Mes Cours</h2>
 
+    <div class="courses-grid">
+
+        <div class="course-card">
+            <div class="course-icon">
+                <i class="fas fa-square-root-alt"></i>
+            </div>
+            <h3>Mathématiques</h3>
+            <p>Algèbre & Géométrie</p>
+        </div>
+
+        <div class="course-card">
+            <div class="course-icon">
+                <i class="fas fa-code"></i>
+            </div>
+            <h3>Programmation Web</h3>
+            <p>HTML, CSS, PHP</p>
+        </div>
+
+        <div class="course-card">
+            <div class="course-icon">
+                <i class="fas fa-database"></i>
+            </div>
+            <h3>Base de Données</h3>
+            <p>SQL & Requêtes</p>
+        </div>
+
+        <div class="course-card">
+            <div class="course-icon">
+                <i class="fas fa-globe"></i>
+            </div>
+            <h3>Anglais Technique</h3>
+            <p>Vocabulaire IT</p>
+        </div>
+
+    </div>
+</section>
             <section class="data-grid">
                 <div class="section-block">
                     <h2>Notes par matière</h2>
