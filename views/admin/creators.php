@@ -80,65 +80,57 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
                 </div>
                 <div class="chart-grid">
                     <div class="chart-card">
-                        <h3>Fatou N'Diaye</h3>
+                        <h3>Sadio Ba</h3>
                         <p><strong>Diplôme :</strong> Licence Informatique</p>
-                        <p><strong>Lieu de naissance :</strong> Dakar, Sénégal</p>
                         <p><strong>Formation :</strong> Université Iba der Thiam de Thiés</p>
                         <p><strong>Spécialité :</strong> Développement backend PHP, architecture de base de données, sécurité.</p>
                         <p><strong>Ce que le cours PHP lui a apporté :</strong> une maîtrise des requêtes SQL, de l'authentification sécurisée et de la gestion des données utilisateurs.</p>
                     </div>
                     <div class="chart-card">
-                        <h3>Karim Sow</h3>
+                        <h3>Mouhamadou Moustapha Fall</h3>
                         <p><strong>Diplôme :</strong> Licence Informatique</p>
-                        <p><strong>Lieu de naissance :</strong> Bamako, Mali</p>
                         <p><strong>Formation :</strong> Université Iba der Thiam de Thiés</p>
                         <p><strong>Spécialité :</strong> Interface utilisateur, ergonomie, intégration HTML/CSS.</p>
                         <p><strong>Ce que le cours PHP lui a apporté :</strong> la capacité à transformer des maquettes en applications dynamiques.</p>
                     </div>
                     <div class="chart-card">
-                        <h3>Aïssa Traoré</h3>
+                        <h3>Daouda Camara</h3>
                         <p><strong>Diplôme :</strong> Licence Informatique</p>
-                        <p><strong>Lieu de naissance :</strong> Conakry, Guinée</p>
                         <p><strong>Formation :</strong> Université Iba der Thiam de Thiés</p>
                         <p><strong>Spécialité :</strong> Gestion de projet, déploiement et retours utilisateurs.</p>
                         <p><strong>Ce que le cours PHP lui a apporté :</strong> un regard sur le cycle complet du développement jusqu'à la production.</p>
                     </div>
                     <div class="chart-card">
-                        <h3>Mariama Diop</h3>
+                        <h3>MBaye Babacar Diagne</h3>
                         <p><strong>Diplôme :</strong> Licence Informatique</p>
-                        <p><strong>Lieu de naissance :</strong> Thiés, Sénégal</p>
                         <p><strong>Formation :</strong> Université Iba der Thiam de Thiés</p>
                         <p><strong>Spécialité :</strong> Analyse fonctionnelle, tests et qualité logicielle.</p>
                         <p><strong>Ce que le cours PHP lui a apporté :</strong> une approche rigoureuse pour structurer le code et sécuriser les formulaires.</p>
                     </div>
                     <div class="chart-card">
-                        <h3>El Hadji Ba</h3>
+                        <h3>Pa Aly Ndiaye</h3>
                         <p><strong>Diplôme :</strong> Licence Informatique</p>
-                        <p><strong>Lieu de naissance :</strong> Saint-Louis, Sénégal</p>
                         <p><strong>Formation :</strong> Université Iba der Thiam de Thiés</p>
                         <p><strong>Spécialité :</strong> Architecture des bases de données et optimisation SQL.</p>
                         <p><strong>Ce que le cours PHP lui a apporté :</strong> une expertise pour concevoir des requêtes performantes et fiables.</p>
                     </div>
                     <div class="chart-card">
-                        <h3>Khadija Fall</h3>
+                        <h3>Mohamed El Bachir Gueye</h3>
                         <p><strong>Diplôme :</strong> Licence Informatique</p>
-                        <p><strong>Lieu de naissance :</strong> Tambacounda, Sénégal</p>
                         <p><strong>Formation :</strong> Université Iba der Thiam de Thiés</p>
                         <p><strong>Spécialité :</strong> UX et design d'application.</p>
                         <p><strong>Ce que le cours PHP lui a apporté :</strong> l'intégration fluide entre le design visuel et le backend.</p>
                     </div>
                     <div class="chart-card">
-                        <h3>Ousmane Diouf</h3>
+                        <h3>Gaissiri Tounkara</h3>
                         <p><strong>Diplôme :</strong> Licence Informatique</p>
-                        <p><strong>Lieu de naissance :</strong> Kaolack, Sénégal</p>
                         <p><strong>Formation :</strong> Université Iba der Thiam de Thiés</p>
                         <p><strong>Spécialité :</strong> Gestion de session, authentification et workflow métier.</p>
                         <p><strong>Ce que le cours PHP lui a apporté :</strong> la maîtrise de la logique serveur et de la gestion des utilisateurs.</p>
                     </div>
                     <div class="chart-card">
-                        <h3>Seynabou Gaye</h3>
+                        <h3>Modou Niang</h3>
                         <p><strong>Diplôme :</strong> Licence Informatique</p>
-                        <p><strong>Lieu de naissance :</strong> Ziguinchor, Sénégal</p>
                         <p><strong>Formation :</strong> Université Iba der Thiam de Thiés</p>
                         <p><strong>Spécialité :</strong> Sécurité PHP et validation des données.</p>
                         <p><strong>Ce que le cours PHP lui a apporté :</strong> une expertise pratique pour protéger les formulaires et les sections d'administration.</p>
