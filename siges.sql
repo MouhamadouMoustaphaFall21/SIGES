@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : 127.0.0.1
--- Généré le : jeu. 16 avr. 2026 à 22:03
+-- Généré le : jeu. 16 avr. 2026 à 01:09
 -- Version du serveur : 10.4.32-MariaDB
 -- Version de PHP : 8.0.30
 
@@ -160,7 +160,7 @@ INSERT INTO `effectue` (`id_Etudiant`, `Id_Evaluation`, `note`) VALUES
 (6, 4, 19.67),
 (6, 5, 19.89),
 (6, 6, 14.52),
-(7, 1, 14.75),
+(7, 1, 15.00),
 (7, 3, 11.95),
 (7, 4, 17.88),
 (7, 5, 14.78),

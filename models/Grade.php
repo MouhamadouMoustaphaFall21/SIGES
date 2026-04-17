@@ -231,6 +231,74 @@ class Grade {
     }
 
     /**
+     * Récupérer la liste des étudiants d'une classe
+     */
+    public function getStudentsByClass($id_classe) {
+        $query = "SELECT id_Etudiant, nom, prenom, login
+                  FROM etudiant
+                  WHERE Id_Classe = :id_classe
+                  ORDER BY nom ASC, prenom ASC";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute(['id_classe' => $id_classe]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Récupérer les matières disponibles pour une classe
+     */
+    public function getSubjectsByClass($id_classe) {
+        $query = "SELECT DISTINCT m.Id_Matiere, m.libelle
+                  FROM evaluation ev
+                  JOIN matiere m ON ev.Id_Matiere = m.Id_Matiere
+                  JOIN effectue eff ON ev.Id_Evaluation = eff.Id_Evaluation
+                  JOIN etudiant e ON eff.id_Etudiant = e.id_Etudiant
+                  WHERE e.Id_Classe = :id_classe
+                  ORDER BY m.libelle ASC";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute(['id_classe' => $id_classe]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Récupérer les évaluations pour une classe et une matière
+     */
+    public function getEvaluationsByClassAndSubject($id_classe, $id_matiere) {
+        $query = "SELECT DISTINCT ev.Id_Evaluation, ev.date_eval, ev.semestre,
+                         CONCAT(p.nom, ' ', p.prenom) as professeur,
+                         m.libelle as matiere
+                  FROM evaluation ev
+                  JOIN matiere m ON ev.Id_Matiere = m.Id_Matiere
+                  JOIN professeur p ON ev.Id_Professeur = p.Id_Professeur
+                  JOIN effectue eff ON ev.Id_Evaluation = eff.Id_Evaluation
+                  JOIN etudiant e ON eff.id_Etudiant = e.id_Etudiant
+                  WHERE e.Id_Classe = :id_classe AND ev.Id_Matiere = :id_matiere
+                  ORDER BY ev.date_eval ASC";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute(['id_classe' => $id_classe, 'id_matiere' => $id_matiere]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Récupérer les notes des étudiants pour une classe et une matière
+     */
+    public function getNotesByClassAndSubject($id_classe, $id_matiere) {
+        $query = "SELECT e.id_Etudiant, eff.Id_Evaluation, eff.note
+                  FROM etudiant e
+                  LEFT JOIN effectue eff ON e.id_Etudiant = eff.id_Etudiant
+                  LEFT JOIN evaluation ev ON eff.Id_Evaluation = ev.Id_Evaluation
+                  WHERE e.Id_Classe = :id_classe
+                    AND ev.Id_Matiere = :id_matiere
+                  ORDER BY e.nom ASC, e.prenom ASC, ev.date_eval ASC";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute(['id_classe' => $id_classe, 'id_matiere' => $id_matiere]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
      * Récupérer les matières enseignées par le professeur
      */
     public function getSubjectsByTeacher($id_prof) {
@@ -262,6 +330,47 @@ class Grade {
 
         $stmt = $this->conn->prepare($query);
         $stmt->execute(['id_classe' => $id_classe]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Récupérer les moyennes et bornes de notes par matière pour une classe
+     */
+    public function getClassSubjectStats($id_classe) {
+        $query = "SELECT m.libelle as matiere, m.coefficient,
+                         ROUND(AVG(eff.note), 2) as moyenne_classe,
+                         MIN(eff.note) as note_min,
+                         MAX(eff.note) as note_max
+                  FROM etudiant e
+                  JOIN effectue eff ON e.id_Etudiant = eff.id_Etudiant
+                  JOIN evaluation ev ON eff.Id_Evaluation = ev.Id_Evaluation
+                  JOIN matiere m ON ev.Id_Matiere = m.Id_Matiere
+                  WHERE e.Id_Classe = :id_classe
+                  GROUP BY m.Id_Matiere, m.libelle, m.coefficient
+                  ORDER BY m.libelle ASC";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute(['id_classe' => $id_classe]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Récupérer les notes moyennes par matière pour un étudiant
+     */
+    public function getStudentSubjectGrades($id_etudiant) {
+        $query = "SELECT m.Id_Matiere, m.libelle as matiere, m.coefficient,
+                         ROUND(AVG(eff.note), 2) as note
+                  FROM effectue eff
+                  JOIN evaluation ev ON eff.Id_Evaluation = ev.Id_Evaluation
+                  JOIN matiere m ON ev.Id_Matiere = m.Id_Matiere
+                  WHERE eff.id_Etudiant = :id
+                  GROUP BY m.Id_Matiere, m.libelle, m.coefficient
+                  ORDER BY m.libelle ASC";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id', $id_etudiant);
+        $stmt->execute();
+
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
@@ -323,14 +432,16 @@ class Grade {
                     e.id_Etudiant, 
                     e.nom, 
                     e.prenom,
-                    SUM(eff.note * m.coefficient) / SUM(m.coefficient) as moyenne_generale
+                    CASE WHEN SUM(eff.note IS NOT NULL) = 0 THEN NULL
+                         ELSE ROUND(SUM(eff.note * m.coefficient) / NULLIF(SUM(m.coefficient), 0), 2)
+                    END as moyenne_generale
                 FROM etudiant e
-                JOIN effectue eff ON e.id_Etudiant = eff.id_Etudiant
-                JOIN evaluation ev ON eff.Id_Evaluation = ev.Id_Evaluation
-                JOIN matiere m ON ev.Id_Matiere = m.Id_Matiere
+                LEFT JOIN effectue eff ON e.id_Etudiant = eff.id_Etudiant
+                LEFT JOIN evaluation ev ON eff.Id_Evaluation = ev.Id_Evaluation
+                LEFT JOIN matiere m ON ev.Id_Matiere = m.Id_Matiere
                 WHERE e.Id_Classe = :id_c
                 GROUP BY e.id_Etudiant
-                ORDER BY moyenne_generale DESC";
+                ORDER BY (moyenne_generale IS NULL), moyenne_generale DESC";
         
         $stmt = $this->conn->prepare($query);
         $stmt->execute(['id_c' => $id_classe]);

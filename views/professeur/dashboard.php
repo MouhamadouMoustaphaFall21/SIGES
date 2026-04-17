@@ -97,6 +97,7 @@ foreach ($teacherSummary as $item) {
 
             <nav class="sidebar-nav">
                 <a href="dashboard.php" class="active"><i class='bx bx-grid-alt'></i>Dashboard</a>
+                <a href="schedule.php"><i class='bx bx-calendar'></i>Emploi du temps</a>
                 <a href="grades_entry.php?id_classe=<?= $selected_classe ?>"><i class='bx bx-edit'></i>Saisir notes</a>
                 <a href="view_students.php?id_classe=<?= $selected_classe ?>"><i class='bx bx-group'></i>Mes élèves</a>
                 <a href="view_grades.php?id_classe=<?= $selected_classe ?>"><i class='bx bx-bar-chart-alt-2'></i>Classement</a>
@@ -123,17 +124,17 @@ foreach ($teacherSummary as $item) {
             </section>
 
             <section class="stats-grid">
-                <article class="stat-card">
+                <article class="stat-card" style="background: linear-gradient(135deg, #122b40 20%, rgba(235, 238, 242, 0.95) 95%);">
                     <h3  style="color: white;">Classes affectées</h3>
                     <p class="stat-value"  style="color: white;"><?= count($classes) ?></p>
                     <span class="badge badge-soft"  style="color: white;">Total</span>
                 </article>
-                <article class="stat-card">
+                <article class="stat-card" style="background: linear-gradient(135deg, #2691be 20%, rgba(241, 241, 241, 0.95) 95%);">
                     <h3  style="color: white;">Évaluations créées</h3>
                     <p class="stat-value"  style="color: white;"><?= count($evaluations) ?></p>
                     <span class="badge badge-soft"  style="color: white;">Dernières</span>
                 </article>
-                <article class="stat-card">
+                <article class="stat-card" style="background: linear-gradient(135deg, #00c45b 20%, rgba(248, 248, 248, 0.95) 95%);">
                     <h3  style="color: white;">Taux de réussite</h3>
                     <p class="stat-value"  style="color: white;"><?= count($chartSuccess) ? round(array_sum($chartSuccess) / count($chartSuccess), 1) : 0 ?>%</p>
                     <span class="badge badge-success"  style="color: white;">Moyenne</span>

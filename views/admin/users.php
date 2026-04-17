@@ -61,6 +61,13 @@ $users = $userModel->readAll();
                 <a href="schedule.php"><i class='bx bx-calendar'></i>Emploi du temps</a>
             </nav>
 
+            <div class="sidebar-section">
+                <h3>Créateur</h3>
+                <div class="course-list">
+                    <a href="creators.php">Crédits</a>
+                </div>
+            </div>
+
             <a href="../../controllers/Logout.php" class="logout-btn"><i class='bx bx-log-out'></i>Déconnexion</a>
         </aside>
 

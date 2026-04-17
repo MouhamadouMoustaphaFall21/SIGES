@@ -16,20 +16,31 @@ $profData = $teacherModel->getProfileByLogin($_SESSION['user_login']);
 $id_classe = isset($_GET['id_classe']) ? intval($_GET['id_classe']) : 0;
 
 $assignedClasses = $teacherModel->getAssignedClasses($profData['Id_Professeur'])->fetchAll(PDO::FETCH_ASSOC);
+$selected_classe = isset($_GET['id_classe']) ? intval($_GET['id_classe']) : 0;
+if (!$selected_classe && count($assignedClasses) > 0) {
+    $selected_classe = $assignedClasses[0]['Id_Classe'];
+}
+
 $allowed = false;
+$selectedClassLabel = 'Classe';
 foreach ($assignedClasses as $ac) {
-    if ($ac['Id_Classe'] == $id_classe) {
+    if ($ac['Id_Classe'] == $selected_classe) {
         $allowed = true;
+        $selectedClassLabel = $ac['libelle'] . ' ' . $ac['niveau'];
         break;
     }
 }
 
 if (!$allowed) {
-    header("Location: dashboard.php");
+    if (count($assignedClasses) > 0) {
+        header("Location: view_grades.php?id_classe=" . $assignedClasses[0]['Id_Classe']);
+    } else {
+        header("Location: dashboard.php");
+    }
     exit();
 }
 
-$ranking = $gradeModel->getRankingByClasse($id_classe);
+$ranking = $gradeModel->getRankingByClasse($selected_classe);
 ?>
 
 <!DOCTYPE html>
@@ -73,7 +84,7 @@ $ranking = $gradeModel->getRankingByClasse($id_classe);
             <section class="page-header page-header-schedule">
                 <div>
                     <p class="eyebrow">Classement</p>
-                    <h1>Classe <?= htmlspecialchars($id_classe) ?></h1>
+                    <h1><?= htmlspecialchars($selectedClassLabel) ?></h1>
                     <p>Consultez le classement des étudiants de votre classe avec les moyennes générales.</p>
                 </div>
                 <div class="header-user-card">
@@ -85,6 +96,16 @@ $ranking = $gradeModel->getRankingByClasse($id_classe);
             <section class="section-block">
                 <div class="section-title-row">
                     <h2>Classement des Élèves</h2>
+                    <form method="GET" style="display:inline-flex; gap:12px; align-items:center;">
+                        <label>Choisir la classe :</label>
+                        <select name="id_classe" onchange="this.form.submit()">
+                            <?php foreach ($assignedClasses as $c): ?>
+                                <option value="<?= $c['Id_Classe'] ?>" <?= $selected_classe == $c['Id_Classe'] ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($c['libelle'] . ' ' . $c['niveau']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </form>
                 </div>
 
                 <div class="table-card">

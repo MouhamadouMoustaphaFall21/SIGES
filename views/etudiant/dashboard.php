@@ -96,7 +96,7 @@ $professors = $teacherModel->getProfessorsByClasse($id_classe)->fetchAll(PDO::FE
         <main class="student-main">
 
             <section class="page-header page-header-dashboard">
-
+                 
                 <div>
                     <p class="eyebrow">Dashboard étudiant</p>
                     <h1>Mes notes et ressources</h1>
@@ -111,23 +111,23 @@ $professors = $teacherModel->getProfessorsByClasse($id_classe)->fetchAll(PDO::FE
                     <strong> Bonjour, <?= htmlspecialchars($studentData['prenom']) ?></strong>
                     <span>Bienvenue sur votre espace</span>
                 </div>
-
+              
             </section>
 
             <section class="stats-grid">
-                <article class="stat-card">
+                <article class="stat-card" style="background: linear-gradient(135deg, #122b40 20%, rgba(235, 238, 242, 0.95) 95%);">
                     <h3  style="color: white;">Moyenne Générale</h3>
                     <p class="stat-value"  style="color: white;"><?= $moyenneGenerale ?> / 20</p>
                     <span class="video-meta badge <?= ($moyenneGenerale >= 10) ? 'tag-success' : 'tag-danger' ?>"  style="color: white;">
                         <?= ($moyenneGenerale >= 10) ? 'ADMIS' : 'AJOURNÉ' ?>
                     </span>
                 </article>
-                <article class="stat-card">
+                <article class="stat-card" style="background: linear-gradient(135deg, #2691be 20%, rgba(241, 241, 241, 0.95) 95%);">
                     <h3  style="color: white;">Rang</h3>
                     <p class="stat-value"  style="color: white;"><?= $rang ?> / <?= count($classement) ?></p>
                     <span class="video-meta badge"  style="color: white;">Classe</span>
                 </article>
-                <article class="stat-card">
+                <article class="stat-card" style="background: linear-gradient(135deg, #F29100 20%, rgba(248, 248, 248, 0.95) 95%);">
                     <h3  style="color: white;">Professeurs</h3>
                     <p class="stat-value"  style="color: white;"><?= count($professors) ?></p>
                     <span class="video-meta badge"  style="color: white;">Actifs</span>
@@ -250,13 +250,13 @@ $professors = $teacherModel->getProfessorsByClasse($id_classe)->fetchAll(PDO::FE
                                         $status = '';
                                         $badgeClass = '';
                                         if ($note >= 16) {
-                                            $status = 'Très Bien';
+                                            $status = 'Excellent';
                                             $badgeClass = 'badge-success';
                                         } elseif ($note >= 14) {
-                                            $status = ' Bien';
+                                            $status = 'Très Bien';
                                             $badgeClass = 'badge-success';
                                         } elseif ($note >= 12) {
-                                            $status = 'AssezBien';
+                                            $status = 'Bien';
                                             $badgeClass = 'badge-warning';
                                         } elseif ($note >= 10) {
                                             $status = 'Passable';

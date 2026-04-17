@@ -25,7 +25,29 @@ $gradeModel = new Grade($db);
 
 // 1. Récupérer les infos du prof et l'ID de la classe depuis l'URL
 $profData = $teacherModel->getProfileByLogin($_SESSION['user_login']);
-$id_classe = isset($_GET['id_classe']) ? intval($_GET['id_classe']) : 0;
+$assignedClasses = $teacherModel->getAssignedClasses($profData['Id_Professeur'])->fetchAll(PDO::FETCH_ASSOC);
+$selected_classe = isset($_GET['id_classe']) ? intval($_GET['id_classe']) : 0;
+if (!$selected_classe && count($assignedClasses) > 0) {
+    $selected_classe = $assignedClasses[0]['Id_Classe'];
+}
+
+$allowed = false;
+$selectedClassLabel = 'Classe';
+foreach ($assignedClasses as $c) {
+    if ($c['Id_Classe'] == $selected_classe) {
+        $allowed = true;
+        $selectedClassLabel = $c['libelle'] . ' ' . $c['niveau'];
+        break;
+    }
+}
+if (!$allowed) {
+    if (count($assignedClasses) > 0) {
+        header('Location: grades_entry.php?id_classe=' . $assignedClasses[0]['Id_Classe']);
+        exit();
+    }
+    header('Location: dashboard.php');
+    exit();
+}
 
 // 2. Récupérer les évaluations du professeur
 $allEvaluations = $gradeModel->getTeacherEvaluations($profData['Id_Professeur']);
@@ -44,7 +66,7 @@ if (!$id_evaluation) {
                       WHERE e.Id_Classe = :id_c
                       ORDER BY e.nom ASC";
     $stmtStudents = $db->prepare($queryStudents);
-    $stmtStudents->execute(['id_ev' => $id_evaluation, 'id_c' => $id_classe]);
+    $stmtStudents->execute(['id_ev' => $id_evaluation, 'id_c' => $selected_classe]);
     $students = $stmtStudents->fetchAll(PDO::FETCH_ASSOC);
 }
 ?>
@@ -80,9 +102,9 @@ if (!$id_evaluation) {
 
             <nav class="sidebar-nav">
                 <a href="dashboard.php"><i class='bx bx-grid-alt'></i>Dashboard</a>
-                <a href="grades_entry.php?id_classe=<?= $id_classe ?>" class="active"><i class='bx bx-edit'></i>Saisir notes</a>
-                <a href="view_students.php?id_classe=<?= $id_classe ?>"><i class='bx bx-group'></i>Mes élèves</a>
-                <a href="view_grades.php?id_classe=<?= $id_classe ?>"><i class='bx bx-bar-chart-alt-2'></i>Classement</a>
+                <a href="grades_entry.php?id_classe=<?= $selected_classe ?>" class="active"><i class='bx bx-edit'></i>Saisir notes</a>
+                <a href="view_students.php?id_classe=<?= $selected_classe ?>"><i class='bx bx-group'></i>Mes élèves</a>
+                <a href="view_grades.php?id_classe=<?= $selected_classe ?>"><i class='bx bx-bar-chart-alt-2'></i>Classement</a>
             </nav>
 
             <a href="../../controllers/Logout.php" class="logout-btn"><i class='bx bx-log-out'></i>Déconnexion</a>
@@ -92,7 +114,7 @@ if (!$id_evaluation) {
             <section class="page-header page-header-reclamation">
                 <div>
                     <p class="eyebrow">Saisie des notes</p>
-                    <h1>Classe <?= htmlspecialchars($id_classe) ?></h1>
+                    <h1><?= htmlspecialchars($selectedClassLabel) ?></h1>
                     <p>Choisissez l'évaluation et saisissez les notes des étudiants.</p>
                 </div>
                 <div class="header-user-card">
@@ -108,7 +130,16 @@ if (!$id_evaluation) {
 
                 <div class="form-box" style="max-width: 600px;">
                     <form method="GET">
-                        <input type="hidden" name="id_classe" value="<?= $id_classe ?>">
+                        <div class="form-group">
+                            <label>Classe</label>
+                            <select name="id_classe" onchange="this.form.submit()" style="max-width: none;">
+                                <?php foreach ($assignedClasses as $c): ?>
+                                    <option value="<?= $c['Id_Classe'] ?>" <?= $selected_classe == $c['Id_Classe'] ? 'selected' : '' ?>>
+                                        <?= htmlspecialchars($c['libelle'] . ' ' . $c['niveau']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
                         <div class="form-group">
                             <label>Évaluation à saisir</label>
                             <select name="id_evaluation" onchange="this.form.submit()" style="max-width: none;">
@@ -135,7 +166,7 @@ if (!$id_evaluation) {
                 <?php if ($id_evaluation): ?>
                     <form action="../../controllers/GradeController.php" method="POST">
                         <input type="hidden" name="id_evaluation" value="<?= $id_evaluation ?>">
-                        <input type="hidden" name="id_classe" value="<?= $id_classe ?>">
+                        <input type="hidden" name="id_classe" value="<?= $selected_classe ?>">
 
                         <div class="table-card">
                             <table>

@@ -19,25 +19,56 @@ $db = $database->getConnection();
 
 // 2. Récupération des statistiques globales (Comptage simple)
 $stats = [];
-$stats['etudiants'] = $db->query("SELECT COUNT(*) FROM etudiant")->fetchColumn();
-$stats['professeurs'] = $db->query("SELECT COUNT(*) FROM professeur")->fetchColumn();
-$stats['classes'] = $db->query("SELECT COUNT(*) FROM classe")->fetchColumn();
-$stats['matieres'] = $db->query("SELECT COUNT(*) FROM matiere")->fetchColumn();
-$stats['evaluations'] = $db->query("SELECT COUNT(*) FROM evaluation")->fetchColumn();
-$stats['notes'] = $db->query("SELECT COUNT(*) FROM effectue")->fetchColumn();
-
-// Statistiques avancées
+$stats['admis'] = $db->query("SELECT COUNT(*) FROM (
+    SELECT id_Etudiant, AVG(note) AS moyenne
+    FROM effectue
+    WHERE note IS NOT NULL
+    GROUP BY id_Etudiant
+    HAVING AVG(note) >= 10
+) AS sub")->fetchColumn();
 $stats['moyenne_generale'] = $db->query("SELECT AVG(note) FROM effectue WHERE note IS NOT NULL")->fetchColumn();
-$stats['taux_reussite'] = $db->query("SELECT (COUNT(CASE WHEN note >= 10 THEN 1 END) * 100.0 / COUNT(*)) FROM effectue WHERE note IS NOT NULL")->fetchColumn();
-$stats['notes_saisies'] = $db->query("SELECT COUNT(*) FROM effectue WHERE note IS NOT NULL")->fetchColumn();
-$stats['affectations'] = $db->query("SELECT COUNT(*) FROM affecter")->fetchColumn();
+$stats['taux_reussite'] = $db->query("SELECT IFNULL(ROUND((SUM(CASE WHEN note >= 10 THEN 1 ELSE 0 END) * 100.0) / COUNT(*), 1), 0) FROM effectue WHERE note IS NOT NULL")->fetchColumn();
+$stats['taux_licence'] = $db->query("SELECT IFNULL(ROUND((SUM(CASE WHEN avg_note >= 10 THEN 1 ELSE 0 END) * 100.0) / COUNT(*), 1), 0)
+    FROM (
+        SELECT e.id_Etudiant, AVG(eff.note) AS avg_note
+        FROM etudiant e
+        JOIN classe c ON e.Id_Classe = c.Id_Classe
+        JOIN effectue eff ON e.id_Etudiant = eff.id_Etudiant
+        WHERE eff.note IS NOT NULL AND c.niveau LIKE 'Licence %'
+        GROUP BY e.id_Etudiant
+    ) AS t")->fetchColumn();
+$stats['taux_master'] = $db->query("SELECT IFNULL(ROUND((SUM(CASE WHEN avg_note >= 10 THEN 1 ELSE 0 END) * 100.0) / COUNT(*), 1), 0)
+    FROM (
+        SELECT e.id_Etudiant, AVG(eff.note) AS avg_note
+        FROM etudiant e
+        JOIN classe c ON e.Id_Classe = c.Id_Classe
+        JOIN effectue eff ON e.id_Etudiant = eff.id_Etudiant
+        WHERE eff.note IS NOT NULL AND c.niveau LIKE 'Master %'
+        GROUP BY e.id_Etudiant
+    ) AS t")->fetchColumn();
+
+$noteDistributionRows = $db->query("SELECT CASE
+    WHEN note < 8 THEN '0-7'
+    WHEN note < 10 THEN '8-9.99'
+    WHEN note < 13 THEN '10-12.99'
+    WHEN note < 16 THEN '13-15.99'
+    ELSE '16-20'
+  END AS bucket,
+  COUNT(*) AS count
+  FROM effectue
+  WHERE note IS NOT NULL
+  GROUP BY bucket")->fetchAll(PDO::FETCH_ASSOC);
+$noteBuckets = ['0-7' => 0, '8-9.99' => 0, '10-12.99' => 0, '13-15.99' => 0, '16-20' => 0];
+foreach ($noteDistributionRows as $row) {
+    $noteBuckets[$row['bucket']] = $row['count'];
+}
 
 // 3. Calcul de la moyenne par classe (Performance globale)
 $queryClasses = "SELECT c.Id_Classe, c.libelle, c.niveau,
                  (SELECT AVG(eff.note) 
                   FROM effectue eff 
                   JOIN etudiant e ON eff.id_Etudiant = e.id_Etudiant 
-                  WHERE e.Id_Classe = c.Id_Classe) as moyenne_classe,
+                  WHERE e.Id_Classe = c.Id_Classe AND eff.note IS NOT NULL) as moyenne_classe,
                  (SELECT COUNT(DISTINCT e.id_Etudiant)
                   FROM etudiant e
                   WHERE e.Id_Classe = c.Id_Classe) as nb_etudiants
@@ -55,6 +86,7 @@ $classesPerformance = $stmtClasses->fetchAll(PDO::FETCH_ASSOC);
     <title>Administration - SIGES</title>
     <link rel="stylesheet" href="../../assets/css/style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
@@ -75,6 +107,13 @@ $classesPerformance = $stmtClasses->fetchAll(PDO::FETCH_ASSOC);
                 <a href="schedule.php"><i class='bx bx-calendar'></i>Emploi du temps</a>
             </nav>
 
+                <div class="sidebar-section">
+                <h3>Créateur</h3>
+                <div class="course-list">
+                    <a href="creators.php">Crédits</a>
+                </div>
+            </div>
+
             <a href="../../controllers/Logout.php" class="logout-btn"><i class='bx bx-log-out'></i>Déconnexion</a>
         </aside>
 
@@ -93,24 +132,9 @@ $classesPerformance = $stmtClasses->fetchAll(PDO::FETCH_ASSOC);
 
             <section class="stats-grid">
                 <article class="stat-card">
-                    <h3><i class='bx bx-user'></i> Étudiants inscrits</h3>
-                    <p class="stat-value"><?= $stats['etudiants'] ?></p>
-                    <span class="badge badge-soft">Total</span>
-                </article>
-                <article class="stat-card">
-                    <h3><i class='bx bx-chalkboard'></i> Enseignants</h3>
-                    <p class="stat-value"><?= $stats['professeurs'] ?></p>
-                    <span class="badge badge-soft">Actifs</span>
-                </article>
-                <article class="stat-card">
-                    <h3><i class='bx bx-building-house'></i> Classes actives</h3>
-                    <p class="stat-value"><?= $stats['classes'] ?></p>
-                    <span class="badge badge-soft">Promotions</span>
-                </article>
-                <article class="stat-card">
-                    <h3><i class='bx bx-book'></i> Matières</h3>
-                    <p class="stat-value"><?= $stats['matieres'] ?></p>
-                    <span class="badge badge-soft">Enseignées</span>
+                    <h3><i class='bx bx-check-circle'></i> Étudiants admis</h3>
+                    <p class="stat-value"><?= $stats['admis'] ?></p>
+                    <span class="badge badge-success">Moyenne ≥ 10</span>
                 </article>
                 <article class="stat-card">
                     <h3><i class='bx bx-bar-chart-alt-2'></i> Moyenne générale</h3>
@@ -119,23 +143,39 @@ $classesPerformance = $stmtClasses->fetchAll(PDO::FETCH_ASSOC);
                 </article>
                 <article class="stat-card">
                     <h3><i class='bx bx-trophy'></i> Taux de réussite</h3>
-                    <p class="stat-value"><?= $stats['taux_reussite'] ? round($stats['taux_reussite'], 1) : 0 ?>%</p>
+                    <p class="stat-value"><?= round($stats['taux_reussite'], 1) ?>%</p>
                     <span class="badge badge-success">Global</span>
                 </article>
                 <article class="stat-card">
-                    <h3><i class='bx bx-calendar-check'></i> Évaluations créées</h3>
-                    <p class="stat-value"><?= $stats['evaluations'] ?></p>
-                    <span class="badge badge-soft">Total</span>
+                    <h3><i class='bx bx-graduation'></i> Taux réussite Licence</h3>
+                    <p class="stat-value"><?= round($stats['taux_licence'], 1) ?>%</p>
+                    <span class="badge badge-soft">Licence 1-3</span>
                 </article>
                 <article class="stat-card">
-                    <h3><i class='bx bx-edit-alt'></i> Notes saisies</h3>
-                    <p class="stat-value"><?= $stats['notes_saisies'] ?></p>
-                    <span class="badge badge-soft">Validées</span>
+                    <h3><i class='bx bx-graduation'></i> Taux réussite Master</h3>
+                    <p class="stat-value"><?= round($stats['taux_master'], 1) ?>%</p>
+                    <span class="badge badge-soft">Master 1-2</span>
                 </article>
             </section>
 
             <section class="section-block">
                 <div class="section-title-row">
+                    <h2>Graphiques rapides</h2>
+                </div>
+                <div class="chart-grid">
+                    <div class="chart-card">
+                        <h3>Répartition des notes</h3>
+                        <canvas id="noteDistributionChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Moyenne générale par classe</h3>
+                        <canvas id="classAverageChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section-block">
+                        <div class="section-title-row">
                     <h2>Performance par classe</h2>
                 </div>
 
@@ -174,6 +214,61 @@ $classesPerformance = $stmtClasses->fetchAll(PDO::FETCH_ASSOC);
             </section>
         </main>
     </div>
+    <script>
+        const noteLabels = <?= json_encode(array_keys($noteBuckets)) ?>;
+        const noteData = <?= json_encode(array_values($noteBuckets)) ?>;
+        const classLabels = <?= json_encode(array_map(function ($item) { return htmlspecialchars($item['libelle'] . ' ' . $item['niveau']); }, $classesPerformance)) ?>;
+        const classAverages = <?= json_encode(array_map(function ($item) { return $item['moyenne_classe'] !== null ? round($item['moyenne_classe'], 2) : 0; }, $classesPerformance)) ?>;
+
+        const noteCtx = document.getElementById('noteDistributionChart');
+        if (noteCtx) {
+            new Chart(noteCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: noteLabels,
+                    datasets: [{
+                        label: 'Répartition des notes',
+                        data: noteData,
+                        backgroundColor: ['#60a5fa', '#34d399', '#fbbf24', '#fb7185', '#a78bfa'],
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        }
+
+        const classCtx = document.getElementById('classAverageChart');
+        if (classCtx) {
+            new Chart(classCtx, {
+                type: 'bar',
+                data: {
+                    labels: classLabels,
+                    datasets: [{
+                        label: 'Moyenne générale par classe',
+                        data: classAverages,
+                        backgroundColor: '#34d399',
+                        borderRadius: 12,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: { ticks: { color: '#334155' } },
+                        y: { beginAtZero: true, suggestedMax: 20, ticks: { color: '#334155' } }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+    </script>
 </body>
 
 </html>
