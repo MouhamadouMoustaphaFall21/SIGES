@@ -544,7 +544,11 @@ button, input, textarea, select {
 }
 
 .stat-card {
+<<<<<<< Updated upstream
     background: #f8fafc;
+=======
+    background: white;
+>>>>>>> Stashed changes
     border: 1px solid rgba(46, 134, 171, 0.15);
     border-radius: 24px;
     padding: 24px 22px;
@@ -556,6 +560,7 @@ button, input, textarea, select {
     color: var(--text);
 }
 
+<<<<<<< Updated upstream
 .stat-card:nth-child(1),
 .stat-card:nth-child(2),
 .stat-card:nth-child(3),
@@ -565,6 +570,8 @@ button, input, textarea, select {
     background: #f8fafc;
 }
 
+=======
+>>>>>>> Stashed changes
 .stat-card h3 {
     margin: 0 0 14px;
     font-size: 0.95rem;
