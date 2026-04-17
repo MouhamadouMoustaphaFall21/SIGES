@@ -53,32 +53,10 @@ $students = $studentModel->getByClasse($selected_classe)->fetchAll(PDO::FETCH_AS
 </head>
 <body>
     <div class="student-shell">
-        <aside class="student-sidebar">
-            <div class="sidebar-brand">
-                <img src="../../assets/img/logo_simple-SAP.png" alt="SIGES logo">
-                <div class="brand-title">
-                    <strong>SIGES</strong>
-                    <span>Espace Enseignant</span>
-                </div>
-            </div>
-
-            <div class="profile-box">
-                <div class="profile-avatar"><?= htmlspecialchars(strtoupper(substr($profData['prenom'], 0, 1) . substr($profData['nom'], 0, 1))) ?></div>
-                <div class="profile-info">
-                    <h2><?= htmlspecialchars($profData['prenom'] . ' ' . $profData['nom']) ?></h2>
-                    <p><?= htmlspecialchars($profData['nom_matiere']) ?></p>
-                </div>
-            </div>
-
-            <nav class="sidebar-nav">
-                <a href="dashboard.php"><i class='bx bx-grid-alt'></i>Dashboard</a>
-                <a href="grades_entry.php?id_classe=<?= $id_classe ?>"><i class='bx bx-edit'></i>Saisir notes</a>
-                <a href="view_students.php?id_classe=<?= $id_classe ?>" class="active"><i class='bx bx-group'></i>Mes élèves</a>
-                <a href="view_grades.php?id_classe=<?= $id_classe ?>"><i class='bx bx-bar-chart-alt-2'></i>Classement</a>
-            </nav>
-
-            <a href="../../controllers/Logout.php" class="logout-btn"><i class='bx bx-log-out'></i>Déconnexion</a>
-        </aside>
+        <?php
+$active_page = 'view_students';
+include '_sidebar.php';
+?>
 
         <main class="student-main">
             <section class="page-header page-header-schedule">

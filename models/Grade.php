@@ -1,8 +1,5 @@
 <?php
-/**
- * Modèle Grade - Gestion des notes et calculs des moyennes
- * Basé sur les tables 'effectue', 'evaluation' et 'matiere'
- */
+
 class Grade {
     private $conn;
 
@@ -12,7 +9,6 @@ class Grade {
 
     /**
      * Récupérer les notes détaillées d'un étudiant
-     * Jointure : effectue -> evaluation -> matiere
      */
     public function getStudentGrades($id_etudiant) {
         $query = "SELECT ev.Id_Evaluation, m.libelle as matiere, m.coefficient, eff.note, ev.semestre
@@ -31,7 +27,6 @@ class Grade {
 
     /**
      * Calcul de la moyenne générale pondérée d'un étudiant
-     * Formule : SOMME(note * coefficient) / SOMME(coefficient)
      */
     public function calculateAverage($id_etudiant) {
         $query = "SELECT SUM(eff.note * m.coefficient) as total_points, 
@@ -106,19 +101,32 @@ class Grade {
     /**
      * Créer une nouvelle évaluation pour un professeur
      */
-    public function createEvaluation($date_eval, $semestre, $id_matiere, $id_professeur) {
-        $query = "INSERT INTO evaluation (date_eval, semestre, Id_Matiere, Id_Professeur)
-                  VALUES (:date_eval, :semestre, :id_m, :id_prof)";
-        $stmt = $this->conn->prepare($query);
-        if ($stmt->execute([
-            'date_eval' => $date_eval,
-            'semestre' => $semestre,
-            'id_m' => $id_matiere,
-            'id_prof' => $id_professeur
-        ])) {
-            return $this->conn->lastInsertId();
+    public function createEvaluation($date_eval, $semestre, $id_matiere, $id_professeur, $id_classe = null) {
+        // Id_Classe est optionnel (la colonne peut ne pas exister sur les anciennes installations)
+        try {
+            $query = "INSERT INTO evaluation (date_eval, semestre, Id_Matiere, Id_Professeur, Id_Classe)
+                      VALUES (:date_eval, :semestre, :id_m, :id_prof, :id_c)";
+            $stmt = $this->conn->prepare($query);
+            $ok = $stmt->execute([
+                'date_eval' => $date_eval,
+                'semestre'  => $semestre,
+                'id_m'      => $id_matiere,
+                'id_prof'   => $id_professeur,
+                'id_c'      => $id_classe ?: null
+            ]);
+        } catch (\PDOException $e) {
+            // Colonne Id_Classe absente : fallback sans elle
+            $query = "INSERT INTO evaluation (date_eval, semestre, Id_Matiere, Id_Professeur)
+                      VALUES (:date_eval, :semestre, :id_m, :id_prof)";
+            $stmt = $this->conn->prepare($query);
+            $ok = $stmt->execute([
+                'date_eval' => $date_eval,
+                'semestre'  => $semestre,
+                'id_m'      => $id_matiere,
+                'id_prof'   => $id_professeur
+            ]);
         }
-        return false;
+        return $ok ? $this->conn->lastInsertId() : false;
     }
 
     /**
