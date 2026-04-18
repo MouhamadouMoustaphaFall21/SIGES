@@ -131,6 +131,77 @@ $initials = strtoupper(substr($profile['prenom'], 0, 1) . substr($profile['nom']
 
             <section class="section-block">
                 <div class="section-title-row">
+                    <h2><i class='bx bx-message-square-check'></i>Vos réclamations</h2>
+                </div>
+                <?php
+                // Récupérer les réclamations de l'étudiant
+                $studentReclamations = [];
+                try {
+                    $stmtRec = $db->prepare(
+                        "SELECT r.id_reclamation, r.motif, r.type_reclamation, r.statut, r.commentaire_prof, r.date_reclamation,
+                                m.libelle as matiere, ev.semestre
+                         FROM reclamation r
+                         LEFT JOIN evaluation ev ON ev.Id_Evaluation = r.Id_Evaluation
+                         LEFT JOIN matiere m ON m.Id_Matiere = ev.Id_Matiere
+                         WHERE r.id_Etudiant = :id_e
+                         ORDER BY r.date_reclamation DESC"
+                    );
+                    $stmtRec->execute(['id_e' => $profile['id_Etudiant']]);
+                    $studentReclamations = $stmtRec->fetchAll(PDO::FETCH_ASSOC);
+                } catch (Exception $e) {
+                    $studentReclamations = [];
+                }
+                ?>
+                <?php if (empty($studentReclamations)): ?>
+                    <div class="form-hint" style="border-color:#dbeafe;background:#eff6ff;color:#1e3a8a;">
+                        <strong>Aucune réclamation soumise.</strong>
+                        <p>Vous n'avez pas encore soumis de réclamation.</p>
+                    </div>
+                <?php else: ?>
+                    <div class="table-card">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Matière</th>
+                                    <th>Semestre</th>
+                                    <th>Type</th>
+                                    <th>Motif</th>
+                                    <th>Statut</th>
+                                    <th>Réponse Prof</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($studentReclamations as $rec): ?>
+                                    <tr>
+                                        <td><?= htmlspecialchars($rec['matiere'] ?? 'N/A') ?></td>
+                                        <td><span class="semester-badge">S<?= htmlspecialchars($rec['semestre'] ?? 'N/A') ?></span></td>
+                                        <td><?= htmlspecialchars(ucfirst(str_replace('_', ' ', $rec['type_reclamation'] ?? ''))) ?></td>
+                                        <td style="max-width:200px;white-space:normal;"><?= htmlspecialchars(substr($rec['motif'], 0, 50)) . (strlen($rec['motif']) > 50 ? '...' : '') ?></td>
+                                        <td>
+                                            <?php
+                                            $statusClass = 'status-pending';
+                                            $statusIcon = 'bx-time';
+                                            if ($rec['statut'] === 'Corrigé') {
+                                                $statusClass = 'status-traite';
+                                                $statusIcon = 'bx-check-circle';
+                                            } elseif ($rec['statut'] === 'Décliné') {
+                                                $statusClass = 'status-rejete';
+                                                $statusIcon = 'bx-x-circle';
+                                            }
+                                            ?>
+                                            <span class="status-badge <?= $statusClass ?>"><i class='bx <?= $statusIcon ?>'></i><?= htmlspecialchars($rec['statut']) ?></span>
+                                        </td>
+                                        <td style="max-width:150px;white-space:normal;font-size:0.9rem;"><?= htmlspecialchars($rec['commentaire_prof'] ?: '—') ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php endif; ?>
+            </section>
+
+            <section class="section-block">
+                <div class="section-title-row">
                     <h2><i class='bx bx-list-check'></i>Vos notes récentes</h2>
                 </div>
                 <div class="table-card">

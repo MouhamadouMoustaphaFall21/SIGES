@@ -420,12 +420,13 @@ class Grade {
     /**
      * Créer une réclamation pour une note spécifique
      */
-    public function createReclamation($id_etudiant, $id_evaluation, $motif) {
-        $query = "INSERT INTO reclamation (motif, statut, id_Etudiant, Id_Evaluation) 
-                VALUES (:motif, 'En attente', :id_e, :id_ev)";
+    public function createReclamation($id_etudiant, $id_evaluation, $type_reclamation, $motif) {
+        $query = "INSERT INTO reclamation (type_reclamation, motif, statut, commentaire_prof, date_reclamation, id_Etudiant, Id_Evaluation) 
+                VALUES (:type, :motif, 'En attente', '', NOW(), :id_e, :id_ev)";
         
         $stmt = $this->conn->prepare($query);
         return $stmt->execute([
+            'type'  => $type_reclamation,
             'motif' => $motif,
             'id_e'  => $id_etudiant,
             'id_ev' => $id_evaluation
@@ -451,10 +452,11 @@ class Grade {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function updateReclamationStatus($id_reclamation, $statut) {
-        $query = "UPDATE reclamation SET statut = :statut WHERE id_reclamation = :id_reclamation";
+    public function updateReclamationStatus($id_reclamation, $statut, $commentaire = '') {
+        $query = "UPDATE reclamation SET statut = :statut, commentaire_prof = :commentaire WHERE id_reclamation = :id_reclamation";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':statut', $statut);
+        $stmt->bindParam(':commentaire', $commentaire);
         $stmt->bindParam(':id_reclamation', $id_reclamation, PDO::PARAM_INT);
         return $stmt->execute();
     }

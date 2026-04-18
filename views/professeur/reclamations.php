@@ -108,9 +108,9 @@ $active_page = 'reclamations';
                                 <?php foreach ($reclamations as $rec): ?>
                                     <?php
                                         $badgeClass = 'status-pending';
-                                        if ($rec['statut'] === 'Traité') {
+                                        if ($rec['statut'] === 'Corrigé') {
                                             $badgeClass = 'status-traite';
-                                        } elseif ($rec['statut'] === 'Rejeté') {
+                                        } elseif ($rec['statut'] === 'Décliné') {
                                             $badgeClass = 'status-rejete';
                                         }
                                     ?>
@@ -125,18 +125,8 @@ $active_page = 'reclamations';
                                         <td>
                                             <?php if ($rec['statut'] === 'En attente'): ?>
                                                 <div class="action-buttons">
-                                                    <form action="../../controllers/GradeController.php" method="POST">
-                                                        <input type="hidden" name="action" value="update_reclamation_status">
-                                                        <input type="hidden" name="id_reclamation" value="<?= htmlspecialchars($rec['id_reclamation']) ?>">
-                                                        <input type="hidden" name="new_status" value="Traité">
-                                                        <button type="submit" class="action-small action-small-primary">Traité</button>
-                                                    </form>
-                                                    <form action="../../controllers/GradeController.php" method="POST">
-                                                        <input type="hidden" name="action" value="update_reclamation_status">
-                                                        <input type="hidden" name="id_reclamation" value="<?= htmlspecialchars($rec['id_reclamation']) ?>">
-                                                        <input type="hidden" name="new_status" value="Rejeté">
-                                                        <button type="submit" class="action-small action-small-secondary">Rejeté</button>
-                                                    </form>
+                                                    <button type="button" class="action-small action-small-primary" onclick="openModal(<?= $rec['id_reclamation'] ?>, 'Corrigé')">Corriger</button>
+                                                    <button type="button" class="action-small action-small-secondary" onclick="openModal(<?= $rec['id_reclamation'] ?>, 'Décliné')">Décliner</button>
                                                 </div>
                                             <?php else: ?>
                                                 <span style="color:#475569;opacity:.8;">Aucune action</span>
@@ -151,5 +141,68 @@ $active_page = 'reclamations';
             </section>
         </main>
     </div>
+
+    <!-- Modal pour saisir le commentaire -->
+    <div id="commentModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Répondre à la réclamation</h3>
+                <span class="modal-close" onclick="closeModal()">&times;</span>
+            </div>
+            <form id="commentForm" action="../../controllers/GradeController.php" method="POST">
+                <input type="hidden" name="action" value="update_reclamation_status">
+                <input type="hidden" id="modalReclamationId" name="id_reclamation" value="">
+                <input type="hidden" id="modalStatus" name="new_status" value="">
+                
+                <div class="form-group">
+                    <label for="commentaire_prof">Votre réponse (optionnel)</label>
+                    <textarea id="commentaire_prof" name="commentaire_prof" rows="4" placeholder="Expliquez votre décision..."></textarea>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="closeModal()">Annuler</button>
+                    <button type="submit" class="btn-primary" id="modalSubmitBtn">Confirmer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <style>
+        .modal { position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
+        .modal-content { background-color: #fefefe; margin: 15% auto; padding: 0; border: 1px solid #888; width: 90%; max-width: 500px; border-radius: 12px; }
+        .modal-header { padding: 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .modal-header h3 { margin: 0; color: #1A3C5A; }
+        .modal-close { color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; }
+        .modal-close:hover { color: #000; }
+        .form-group { padding: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #333; }
+        .form-group textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-family: inherit; resize: vertical; }
+        .modal-actions { padding: 20px; border-top: 1px solid #eee; display: flex; justify-content: flex-end; gap: 10px; }
+        .btn-primary, .btn-secondary { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; }
+        .btn-primary { background: #1A3C5A; color: white; }
+        .btn-secondary { background: #f8fafc; color: #1A3C5A; border: 1px solid #cbd5e1; }
+    </style>
+
+    <script>
+        function openModal(reclamationId, status) {
+            document.getElementById('modalReclamationId').value = reclamationId;
+            document.getElementById('modalStatus').value = status;
+            document.getElementById('modalTitle').textContent = status === 'Corrigé' ? 'Corriger la réclamation' : 'Décliner la réclamation';
+            document.getElementById('modalSubmitBtn').textContent = status === 'Corrigé' ? 'Corriger' : 'Décliner';
+            document.getElementById('commentModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('commentModal').style.display = 'none';
+            document.getElementById('commentaire_prof').value = '';
+        }
+
+        // Fermer le modal si on clique en dehors
+        window.onclick = function(event) {
+            if (event.target == document.getElementById('commentModal')) {
+                closeModal();
+            }
+        }
+    </script>
 </body>
 </html>
