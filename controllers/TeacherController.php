@@ -32,18 +32,27 @@ $allowedClassIds = array_column($assignedClasses, 'Id_Classe');
 if ($_POST['action'] === 'create_evaluation') {
     $date_eval = $_POST['date_eval'] ?? date('Y-m-d');
     $semestre  = intval($_POST['semestre'] ?? 1);
-    $matiereId = $profData['Id_Matiere'];
+    $matiereId = $profData['Id_Matiere'] ?? null;
     $id_classe_eval = intval($_POST['id_classe'] ?? 0);
 
-    // Vérifier que le prof est bien affecté à cette classe
-    if ($id_classe_eval && !in_array($id_classe_eval, $allowedClassIds, true)) {
-        header("Location: ../views/professeur/dashboard.php?status=error");
+    if (!$matiereId) {
+        header("Location: ../views/professeur/dashboard.php?status=no_subject");
+        exit();
+    }
+
+    if (empty($allowedClassIds)) {
+        header("Location: ../views/professeur/dashboard.php?status=no_class");
+        exit();
+    }
+
+    if (!$id_classe_eval || !in_array($id_classe_eval, $allowedClassIds, true)) {
+        header("Location: ../views/professeur/dashboard.php?status=invalid_class");
         exit();
     }
 
     $newId = $gradeModel->createEvaluation($date_eval, $semestre, $matiereId, $id_prof, $id_classe_eval);
     $redirect = $newId ? 'eval_created' : 'error';
-    $classeParam = $id_classe_eval ? '&id_classe='.$id_classe_eval : '';
+    $classeParam = $id_classe_eval ? '&id_classe=' . $id_classe_eval : '';
     header("Location: ../views/professeur/dashboard.php?status=$redirect$classeParam");
     exit();
 }

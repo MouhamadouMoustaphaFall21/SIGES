@@ -84,6 +84,24 @@ class User
         try {
             $this->conn->beginTransaction();
 
+            // Récupérer l'ancien login de l'étudiant
+            $queryOldLogin = "SELECT login FROM etudiant WHERE id_Etudiant = :id";
+            $stmtOldLogin = $this->conn->prepare($queryOldLogin);
+            $stmtOldLogin->execute(['id' => $id_etudiant]);
+            $oldLogin = $stmtOldLogin->fetchColumn();
+
+            if (!$oldLogin) {
+                $this->conn->rollBack();
+                return false;
+            }
+
+            // Si le login change, créer temporairement le nouvel utilisateur avant de mettre à jour le profil
+            if ($login !== $oldLogin) {
+                $queryCopyUser = "INSERT INTO utilisateur (login, password, role) SELECT :new_login, password, role FROM utilisateur WHERE login = :old_login";
+                $stmtCopy = $this->conn->prepare($queryCopyUser);
+                $stmtCopy->execute(['new_login' => $login, 'old_login' => $oldLogin]);
+            }
+
             // Mettre à jour la table etudiant
             $queryStudent = "UPDATE etudiant SET nom = :nom, prenom = :prenom, Id_Classe = :id_classe, login = :login WHERE id_Etudiant = :id";
             $stmtStudent = $this->conn->prepare($queryStudent);
@@ -95,13 +113,11 @@ class User
                 'id' => $id_etudiant
             ]);
 
-            // Mettre à jour la table utilisateur si login changé
-            $queryUser = "UPDATE utilisateur SET login = :login WHERE login = (SELECT login FROM etudiant WHERE id_Etudiant = :id)";
-            $stmtUser = $this->conn->prepare($queryUser);
-            $stmtUser->execute([
-                'login' => $login,
-                'id' => $id_etudiant
-            ]);
+            if ($login !== $oldLogin) {
+                $queryDeleteOldUser = "DELETE FROM utilisateur WHERE login = :old_login";
+                $stmtDeleteOldUser = $this->conn->prepare($queryDeleteOldUser);
+                $stmtDeleteOldUser->execute(['old_login' => $oldLogin]);
+            }
 
             $this->conn->commit();
             return true;
@@ -119,6 +135,23 @@ class User
         try {
             $this->conn->beginTransaction();
 
+            // Récupérer l'ancien login du professeur
+            $queryOldLogin = "SELECT login FROM professeur WHERE Id_Professeur = :id";
+            $stmtOldLogin = $this->conn->prepare($queryOldLogin);
+            $stmtOldLogin->execute(['id' => $id_prof]);
+            $oldLogin = $stmtOldLogin->fetchColumn();
+
+            if (!$oldLogin) {
+                $this->conn->rollBack();
+                return false;
+            }
+
+            if ($login !== $oldLogin) {
+                $queryCopyUser = "INSERT INTO utilisateur (login, password, role) SELECT :new_login, password, role FROM utilisateur WHERE login = :old_login";
+                $stmtCopy = $this->conn->prepare($queryCopyUser);
+                $stmtCopy->execute(['new_login' => $login, 'old_login' => $oldLogin]);
+            }
+
             // Mettre à jour la table professeur
             $queryProf = "UPDATE professeur SET nom = :nom, prenom = :prenom, login = :login WHERE Id_Professeur = :id";
             $stmtProf = $this->conn->prepare($queryProf);
@@ -129,13 +162,11 @@ class User
                 'id' => $id_prof
             ]);
 
-            // Mettre à jour la table utilisateur
-            $queryUser = "UPDATE utilisateur SET login = :login WHERE login = (SELECT login FROM professeur WHERE Id_Professeur = :id)";
-            $stmtUser = $this->conn->prepare($queryUser);
-            $stmtUser->execute([
-                'login' => $login,
-                'id' => $id_prof
-            ]);
+            if ($login !== $oldLogin) {
+                $queryDeleteOldUser = "DELETE FROM utilisateur WHERE login = :old_login";
+                $stmtDeleteOldUser = $this->conn->prepare($queryDeleteOldUser);
+                $stmtDeleteOldUser->execute(['old_login' => $oldLogin]);
+            }
 
             $this->conn->commit();
             return true;

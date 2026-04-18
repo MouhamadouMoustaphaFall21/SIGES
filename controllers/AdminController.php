@@ -115,16 +115,56 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     // Action : Suppression d'un utilisateur
     if ($_POST['action'] === 'delete_user') {
         $login = $_POST['login'];
-        $query = "DELETE FROM utilisateur WHERE login = :l";
-        $stmt = $db->prepare($query);
-        $stmt->execute(['l' => $login]);
-        header("Location: ../views/admin/users.php?status=deleted");
+
+        // Récupérer le rôle de l'utilisateur
+        $queryRole = "SELECT role FROM utilisateur WHERE login = :l";
+        $stmtRole = $db->prepare($queryRole);
+        $stmtRole->execute(['l' => $login]);
+        $user = $stmtRole->fetch(PDO::FETCH_ASSOC);
+
+        if (!$user) {
+            header("Location: ../views/admin/users.php?msg=error");
+            exit();
+        }
+
+        $role = $user['role'];
+
+        try {
+            $db->beginTransaction();
+
+            if ($role === 'Etudiant') {
+                // Supprimer les enregistrements dans effectue d'abord
+                $queryDeleteEffectue = "DELETE FROM effectue WHERE id_Etudiant = (SELECT id_Etudiant FROM etudiant WHERE login = :l)";
+                $stmtEffectue = $db->prepare($queryDeleteEffectue);
+                $stmtEffectue->execute(['l' => $login]);
+            } elseif ($role === 'Professeur') {
+                // Supprimer les créneaux et évaluations d'abord
+                $queryDeleteCreneau = "DELETE FROM creneau WHERE Id_Professeur = (SELECT Id_Professeur FROM professeur WHERE login = :l)";
+                $stmtCreneau = $db->prepare($queryDeleteCreneau);
+                $stmtCreneau->execute(['l' => $login]);
+
+                $queryDeleteEvaluation = "DELETE FROM evaluation WHERE Id_Professeur = (SELECT Id_Professeur FROM professeur WHERE login = :l)";
+                $stmtEvaluation = $db->prepare($queryDeleteEvaluation);
+                $stmtEvaluation->execute(['l' => $login]);
+            }
+
+            // Supprimer l'utilisateur (cascade vers etudiant/professeur)
+            $queryDeleteUser = "DELETE FROM utilisateur WHERE login = :l";
+            $stmtUser = $db->prepare($queryDeleteUser);
+            $stmtUser->execute(['l' => $login]);
+
+            $db->commit();
+            header("Location: ../views/admin/users.php?msg=success");
+        } catch (Exception $e) {
+            $db->rollBack();
+            header("Location: ../views/admin/users.php?msg=error");
+        }
         exit();
     }
 
     // Cas : Mise à jour d'un étudiant
     if ($_POST['action'] === 'update_student') {
-        $id_etudiant = $_POST['id_etudiant'];
+        $id_etudiant = $_POST['user_id'];
         $nom = $_POST['nom'];
         $prenom = $_POST['prenom'];
         $id_classe = $_POST['id_classe'];
@@ -140,7 +180,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
     // Cas : Mise à jour d'un professeur
     if ($_POST['action'] === 'update_prof') {
-        $id_prof = $_POST['id_prof'];
+        $id_prof = $_POST['user_id'];
         $nom = $_POST['nom'];
         $prenom = $_POST['prenom'];
         $login = $_POST['login'];
