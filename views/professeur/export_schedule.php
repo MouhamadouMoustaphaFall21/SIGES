@@ -87,6 +87,8 @@ function getColor($id) {
             border-right: 2px solid #e2e8f0;
         }
         .day-cell { padding: 4px; min-height: 70px; }
+        .day-highlight { background: rgba(56, 189, 248, 0.08); }
+        .sched-table th.day-highlight { background: #dbeafe; color: #1A3C5A; }
         .slot-card {
             border-radius: 7px; border-left: 4px solid;
             padding: 8px 10px; margin-bottom: 3px;
@@ -123,7 +125,6 @@ function getColor($id) {
     <h1>📄 Emploi du temps — <?= htmlspecialchars($profData['prenom'].' '.$profData['nom']) ?></h1>
     <div style="display:flex;gap:10px;">
         <a href="javascript:history.back()" class="btn-back">← Retour</a>
-        <button class="btn-print" onclick="window.print()">🖨️ Exporter / Imprimer PDF</button>
     </div>
 </div>
 
@@ -146,7 +147,7 @@ function getColor($id) {
             <tr>
                 <th>Horaire</th>
                 <?php foreach ($days as $d): ?>
-                    <th><?= $d ?></th>
+                    <th class="<?= in_array($d, ['Lundi','Mardi','Mercredi','Jeudi','Samedi']) ? 'day-highlight' : '' ?>"><?= $d ?></th>
                 <?php endforeach; ?>
             </tr>
         </thead>
@@ -156,8 +157,9 @@ function getColor($id) {
                 <td class="time-cell"><?= htmlspecialchars($time) ?></td>
                 <?php foreach ($days as $day):
                     $slots = $grid[$time][$day] ?? [];
+                    $dayClass = in_array($day, ['Lundi','Mardi','Mercredi','Jeudi','Samedi']) ? 'day-highlight' : '';
                 ?>
-                <td class="day-cell">
+                <td class="day-cell <?= $dayClass ?>">
                     <?php if ($slots): ?>
                         <?php foreach ($slots as $slot):
                             $col = getColor($slot['Id_Matiere']);
@@ -210,9 +212,7 @@ function getColor($id) {
 </div>
 
 <script>
-<?php if (isset($_GET['auto'])): ?>
 window.addEventListener('load', () => setTimeout(() => window.print(), 600));
-<?php endif; ?>
 </script>
 </body>
 </html>

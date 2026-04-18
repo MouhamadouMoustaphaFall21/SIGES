@@ -54,6 +54,7 @@ $active_page = 'schedule';
     <title>Emploi du temps - SIGES</title>
     <link rel="stylesheet" href="../../assets/css/style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css">
+    <script src="../../assets/js/pdf-export.js"></script>
     <style>
         /* ── Toolbar ── */
         .sched-toolbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:24px}
@@ -81,6 +82,8 @@ $active_page = 'schedule';
         .day-col{position:relative;border-right:1px solid #f1f5f9;border-bottom:1px solid #f1f5f9}
         .day-col:last-child{border-right:none}
         .day-col.today-col{background:#f0f7fb}
+        .day-col.day-highlight{background:rgba(56,189,248,0.08)}
+        .cal-head-cell.day-highlight{background:#dbeafe;color:#1A3C5A;border-color:#bfdbfe}
 
         /* Hour dividers */
         .hour-line{position:absolute;left:0;right:0;border-top:1px solid #f1f5f9;height:0}
@@ -140,10 +143,10 @@ $active_page = 'schedule';
                         }
                         ?>
                     </select>
-                    <a href="export_schedule.php" target="_blank"
-                       style="display:inline-flex;align-items:center;gap:6px;padding:9px 16px;background:#1A3C5A;color:white;border-radius:10px;text-decoration:none;font-weight:700;font-size:.88rem;">
-                        <i class='bx bx-download'></i>Exporter PDF
-                    </a>
+                    <button onclick="downloadSchedulePDF('emploi-du-temps-professeur.pdf')"
+                       style="display:inline-flex;align-items:center;gap:6px;padding:9px 16px;background:#1A3C5A;color:white;border-radius:10px;border:none;font-weight:700;font-size:.88rem;cursor:pointer;">
+                        <i class='bx bx-download'></i>Télécharger PDF
+                    </button>
                     <select class="toolbar-select" id="filterClasse" onchange="applyFilter()">
                         <option value="">Toutes les classes</option>
                         <?php
@@ -170,7 +173,7 @@ $active_page = 'schedule';
                     <div class="cal-head">
                         <div class="cal-head-cell corner"></div>
                         <?php foreach ($days as $day): ?>
-                            <div class="cal-head-cell <?= $day===$todayName?'today-col':'' ?>">
+                            <div class="cal-head-cell <?= $day===$todayName ? 'today-col' : '' ?> <?= in_array($day, ['Lundi','Mardi','Mercredi','Jeudi','Samedi']) ? 'day-highlight' : '' ?>">
                                 <?= $day ?>
                                 <?php if ($day === $todayName): ?>
                                     <span style="display:block;width:6px;height:6px;background:#2E86AB;border-radius:50%;margin:4px auto 0;"></span>
@@ -184,7 +187,7 @@ $active_page = 'schedule';
                         <!-- Heure entière -->
                         <div class="time-label"><?= str_pad($h, 2, '0', STR_PAD_LEFT) ?>h</div>
                         <?php foreach ($days as $day): ?>
-                            <div class="day-col <?= $day===$todayName?'today-col':'' ?>" style="height:60px;">
+                            <div class="day-col <?= $day===$todayName ? 'today-col' : '' ?> <?= in_array($day, ['Lundi','Mardi','Mercredi','Jeudi','Samedi']) ? 'day-highlight' : '' ?>" style="height:60px;">
                                 <div class="hour-line" style="top:30px;"></div>
                                 <?php foreach ($byDay[$day] as $slot):
                                     $hDeb = intval(substr($slot['heure_debut'],0,2));

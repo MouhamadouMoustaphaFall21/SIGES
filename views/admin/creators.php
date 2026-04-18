@@ -9,6 +9,11 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
     header("Location: ../../index.php");
     exit();
 }
+
+require_once '../../config/database.php';
+
+$database = new Database();
+$db = $database->getConnection();
 ?>
 
 <!DOCTYPE html>
@@ -108,7 +113,7 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
                         <p><strong>Ce que le cours PHP lui a apporté :</strong> une approche rigoureuse pour structurer le code et sécuriser les formulaires.</p>
                     </div>
                     <div class="chart-card">
-                        <h3>Pa Aly Ndiaye</h3>
+                        <h3>Papa Aly Ndiaye</h3>
                         <p><strong>Diplôme :</strong> Licence Informatique</p>
                         <p><strong>Formation :</strong> Université Iba der Thiam de Thiés</p>
                         <p><strong>Spécialité :</strong> Architecture des bases de données et optimisation SQL.</p>

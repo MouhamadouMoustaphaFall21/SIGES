@@ -60,6 +60,7 @@ $active_page = 'dashboard';
     <link rel="stylesheet" href="../../assets/css/style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../../assets/js/pdf-export.js"></script>
     <style>
         .toast{display:flex;align-items:center;gap:12px;padding:14px 20px;border-radius:12px;font-size:.95rem;font-weight:500;margin-bottom:20px;animation:slideIn .35s ease}
         .toast-success{background:#d1fae5;color:#065f46;border:1px solid #6ee7b7}
@@ -175,37 +176,6 @@ $active_page = 'dashboard';
                     </form>
                 </div>
 
-                <div class="teacher-form-box">
-                    <h3><i class='bx bx-user-plus' style="margin-right:8px;"></i>Ajouter un étudiant</h3>
-                    <form action="../../controllers/TeacherController.php" method="POST">
-                        <input type="hidden" name="action" value="add_student">
-                        <div class="form-group">
-                            <label><i class='bx bx-user'></i> Nom</label>
-                            <input type="text" name="nom" placeholder="Nom" required>
-                        </div>
-                        <div class="form-group">
-                            <label><i class='bx bx-user'></i> Prénom</label>
-                            <input type="text" name="prenom" placeholder="Prénom" required>
-                        </div>
-                        <div class="form-group">
-                            <label><i class='bx bx-envelope'></i> Email</label>
-                            <input type="email" name="login" placeholder="Email de connexion" required>
-                        </div>
-                        <div class="form-group">
-                            <label><i class='bx bx-lock'></i> Mot de passe</label>
-                            <input type="password" name="password" placeholder="Mot de passe" required>
-                        </div>
-                        <div class="form-group">
-                            <label><i class='bx bx-group'></i> Classe</label>
-                            <select name="id_classe" required>
-                                <?php foreach ($classes as $c): ?>
-                                    <option value="<?= $c['Id_Classe'] ?>"><?= htmlspecialchars($c['libelle'].' '.$c['niveau']) ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <button type="submit"><i class='bx bx-user-plus' style="margin-right:8px;"></i>Créer l'étudiant</button>
-                    </form>
-                </div>
             </div>
         </section>
 
@@ -245,18 +215,10 @@ $active_page = 'dashboard';
                     </div>
 
                     <div style="display:flex;gap:10px;">
-                        <a id="btn_export_notes"
-                           href="export_notes.php?id_classe=<?= $selected_classe ?>"
-                           target="_blank"
-                           class="export-btn export-btn-primary" style="flex:1;">
-                            <i class='bx bx-download'></i>Aperçu &amp; Export
-                        </a>
-                        <a id="btn_export_notes_auto"
-                           href="export_notes.php?id_classe=<?= $selected_classe ?>&auto=1"
-                           target="_blank"
-                           class="export-btn export-btn-secondary">
-                            <i class='bx bx-printer'></i>Direct
-                        </a>
+                        <button onclick="downloadNotesPDF('notes-classe-<?= htmlspecialchars($selected_classe) ?>.pdf')"
+                           class="export-btn export-btn-primary" style="flex:1;border:none;cursor:pointer;">
+                            <i class='bx bx-download'></i>Télécharger Notes PDF
+                        </button>
                     </div>
                 </div>
 
@@ -275,14 +237,10 @@ $active_page = 'dashboard';
                     </div>
 
                     <div style="display:flex;gap:10px;margin-top:auto;">
-                        <a href="export_schedule.php" target="_blank"
-                           class="export-btn export-btn-primary" style="flex:1;">
-                            <i class='bx bx-download'></i>Aperçu &amp; Export
-                        </a>
-                        <a href="export_schedule.php?auto=1" target="_blank"
-                           class="export-btn export-btn-secondary">
-                            <i class='bx bx-printer'></i>Direct
-                        </a>
+                        <button onclick="downloadSchedulePDF('emploi-du-temps-<?= htmlspecialchars($profData['prenom'].'-'.$profData['nom']) ?>.pdf')"
+                           class="export-btn export-btn-primary" style="flex:1;border:none;cursor:pointer;">
+                            <i class='bx bx-download'></i>Télécharger PDF
+                        </button>
                     </div>
                 </div>
             </div>
@@ -322,13 +280,6 @@ $active_page = 'dashboard';
 </div>
 
 <script>
-function updateEvalSelect() {
-    const classe = document.getElementById('exp_classe').value;
-    const eval_  = document.getElementById('exp_eval').value;
-    const base   = 'export_notes.php?id_classe=' + classe + (eval_ ? '&id_evaluation=' + eval_ : '');
-    document.getElementById('btn_export_notes').href      = base;
-    document.getElementById('btn_export_notes_auto').href = base + '&auto=1';
-}
 document.getElementById('exp_eval').addEventListener('change', updateEvalSelect);
 document.getElementById('exp_classe').addEventListener('change', updateEvalSelect);
 

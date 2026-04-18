@@ -121,6 +121,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         header("Location: ../views/admin/users.php?status=deleted");
         exit();
     }
+
+    // Cas : Mise à jour d'un étudiant
+    if ($_POST['action'] === 'update_student') {
+        $id_etudiant = $_POST['id_etudiant'];
+        $nom = $_POST['nom'];
+        $prenom = $_POST['prenom'];
+        $id_classe = $_POST['id_classe'];
+        $login = $_POST['login'];
+
+        if ($userModel->updateStudent($id_etudiant, $nom, $prenom, $id_classe, $login)) {
+            header("Location: ../views/admin/users.php?msg=success");
+        } else {
+            header("Location: ../views/admin/users.php?msg=error");
+        }
+        exit();
+    }
+
+    // Cas : Mise à jour d'un professeur
+    if ($_POST['action'] === 'update_prof') {
+        $id_prof = $_POST['id_prof'];
+        $nom = $_POST['nom'];
+        $prenom = $_POST['prenom'];
+        $login = $_POST['login'];
+
+        if ($userModel->updateProf($id_prof, $nom, $prenom, $login)) {
+            header("Location: ../views/admin/users.php?msg=success");
+        } else {
+            header("Location: ../views/admin/users.php?msg=error");
+        }
+        exit();
+    }
+
+    // Cas : Mise à jour d'un admin
+    if ($_POST['action'] === 'update_admin') {
+        $old_login = $_POST['old_login'];
+        $nom = $_POST['nom'];
+        $prenom = $_POST['prenom'];
+        $login = $_POST['login'];
+
+        if ($userModel->updateAdmin($old_login, $nom, $prenom, $login)) {
+            header("Location: ../views/admin/users.php?msg=success");
+        } else {
+            header("Location: ../views/admin/users.php?msg=error");
+        }
+        exit();
+    }
 }
 
 ?>

@@ -79,6 +79,11 @@ usort($timeSlots, function ($a, $b) {
     <title>Gestion Emploi du Temps - SIGES</title>
     <link rel="stylesheet" href="../../assets/css/style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css">
+    <script src="../../assets/js/pdf-export.js"></script>
+    <style>
+        .grid-header.day-highlight { background: rgba(56,189,248,0.12); color: #1A3C5A; }
+        .schedule-cell.day-highlight { background: rgba(56,189,248,0.08); }
+    </style>
 </head>
 
 <body>
@@ -126,8 +131,11 @@ usort($timeSlots, function ($a, $b) {
                 <?php if ($statusMessage): ?>
                     <div class="form-hint" style="margin-bottom: 18px;"><?= htmlspecialchars($statusMessage) ?></div>
                 <?php endif; ?>
-                <div class="section-title-row">
+                <div class="section-title-row" style="justify-content: space-between; align-items: center; gap: 16px;">
                     <h2><?= $editSlot ? 'Modifier un créneau' : 'Ajouter un créneau' ?></h2>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                        <button onclick="downloadSchedulePDF('emploi-du-temps-admin.pdf')" class="button-primary button-small" style="white-space: nowrap; border:none; cursor:pointer;">Télécharger PDF</button>
+                    </div>
                 </div>
                 <?php if ($editSlot): ?>
                     <div class="schedule-toolbar">
@@ -213,13 +221,13 @@ usort($timeSlots, function ($a, $b) {
                     <div class="schedule-grid">
                         <div class="grid-header"></div>
                         <?php foreach ($days as $day): ?>
-                            <div class="grid-header"><?= $day ?></div>
+                            <div class="grid-header <?= in_array($day, ['Lundi','Mardi','Mercredi','Jeudi','Samedi']) ? 'day-highlight' : '' ?>"><?= $day ?></div>
                         <?php endforeach; ?>
 
                         <?php foreach ($timeSlots as $time): ?>
                             <div class="grid-time"><?= $time ?></div>
                             <?php foreach ($days as $day): ?>
-                                <div class="schedule-cell">
+                                <div class="schedule-cell <?= in_array($day, ['Lundi','Mardi','Mercredi','Jeudi','Samedi']) ? 'day-highlight' : '' ?>">
                                     <?php if (!empty($scheduleGrid[$time][$day])): ?>
                                         <?php foreach ($scheduleGrid[$time][$day] as $slot): ?>
                                             <?php $slotColor = getScheduleColor($slot['Id_Matiere']); ?>

@@ -74,6 +74,7 @@ $teacherAssignments = $db->query("SELECT p.nom, p.prenom, COUNT(a.Id_Classe) AS 
                 <a href="users.php"><i class='bx bx-user-circle'></i>Gestion utilisateurs</a>
                 <a href="grades_view.php"><i class='bx bx-book'></i>PV Délibération</a>
                 <a href="schedule.php"><i class='bx bx-calendar'></i>Emploi du temps</a>
+                <a href="reclamations.php"><i class='bx bx-message-square-detail'></i>Réclamations</a>
             </nav>
 
             <div class="sidebar-section">

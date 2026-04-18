@@ -256,7 +256,7 @@ class Grade {
      * Récupérer les matières disponibles pour une classe
      */
     public function getSubjectsByClass($id_classe) {
-        $query = "SELECT DISTINCT m.Id_Matiere, m.libelle
+        $query = "SELECT DISTINCT m.Id_Matiere, m.libelle, m.coefficient
                   FROM evaluation ev
                   JOIN matiere m ON ev.Id_Matiere = m.Id_Matiere
                   JOIN effectue eff ON ev.Id_Evaluation = eff.Id_Evaluation
@@ -436,21 +436,40 @@ class Grade {
      * Génère le PV de délibération pour une classe entière
      */
     public function getClassPV($id_classe) {
-        $query = "SELECT 
-                    e.id_Etudiant, 
-                    e.nom, 
-                    e.prenom,
-                    CASE WHEN SUM(eff.note IS NOT NULL) = 0 THEN NULL
-                         ELSE ROUND(SUM(eff.note * m.coefficient) / NULLIF(SUM(m.coefficient), 0), 2)
-                    END as moyenne_generale
-                FROM etudiant e
-                LEFT JOIN effectue eff ON e.id_Etudiant = eff.id_Etudiant
-                LEFT JOIN evaluation ev ON eff.Id_Evaluation = ev.Id_Evaluation
-                LEFT JOIN matiere m ON ev.Id_Matiere = m.Id_Matiere
-                WHERE e.Id_Classe = :id_c
-                GROUP BY e.id_Etudiant
+        $query = "SELECT * FROM (
+                    SELECT 
+                        e.id_Etudiant, 
+                        e.nom, 
+                        e.prenom,
+                        CASE WHEN SUM(eff.note IS NOT NULL) = 0 THEN NULL
+                             ELSE ROUND(SUM(eff.note * m.coefficient) / NULLIF(SUM(CASE WHEN eff.note IS NOT NULL THEN m.coefficient ELSE 0 END), 0), 2)
+                        END as moyenne_generale
+                    FROM etudiant e
+                    LEFT JOIN effectue eff ON e.id_Etudiant = eff.id_Etudiant
+                    LEFT JOIN evaluation ev ON eff.Id_Evaluation = ev.Id_Evaluation
+                    LEFT JOIN matiere m ON ev.Id_Matiere = m.Id_Matiere
+                    WHERE e.Id_Classe = :id_c
+                    GROUP BY e.id_Etudiant
+                ) t
                 ORDER BY (moyenne_generale IS NULL), moyenne_generale DESC";
         
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute(['id_c' => $id_classe]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Récupérer les notes détaillées pour le PV d'une classe
+     */
+    public function getDetailedGradesByClass($id_classe) {
+        $query = "SELECT e.id_Etudiant, e.nom, e.prenom, m.libelle as matiere, m.coefficient, eff.note
+                  FROM etudiant e
+                  LEFT JOIN effectue eff ON e.id_Etudiant = eff.id_Etudiant
+                  LEFT JOIN evaluation ev ON eff.Id_Evaluation = ev.Id_Evaluation
+                  LEFT JOIN matiere m ON ev.Id_Matiere = m.Id_Matiere
+                  WHERE e.Id_Classe = :id_c
+                  ORDER BY e.nom ASC, e.prenom ASC, m.libelle ASC";
+
         $stmt = $this->conn->prepare($query);
         $stmt->execute(['id_c' => $id_classe]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);

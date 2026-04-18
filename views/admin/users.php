@@ -7,6 +7,16 @@ require_once '../../models/User.php';
 $database = new Database();
 $db = $database->getConnection();
 
+$pendingReclamations = 0;
+try {
+    $hasReclamTable = (int) $db->query("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = 'reclamation'")->fetchColumn();
+    if ($hasReclamTable) {
+        $pendingReclamations = (int) $db->query("SELECT COUNT(*) FROM reclamation WHERE statut = 'En attente'")->fetchColumn();
+    }
+} catch (PDOException $e) {
+    $pendingReclamations = 0;
+}
+
 // Récupération des classes pour le formulaire d'étudiant
 $queryClasses = "SELECT * FROM classe ORDER BY libelle, niveau";
 $stmtClasses = $db->prepare($queryClasses);
@@ -31,6 +41,15 @@ $assignments = $db->query("SELECT p.nom as prof_nom, p.prenom as prof_prenom, c.
 
 $userModel = new User($db);
 $users = $userModel->readAll();
+
+// Récupération des étudiants
+$students = $db->query("SELECT e.*, c.libelle as classe_nom, c.niveau FROM etudiant e LEFT JOIN classe c ON e.Id_Classe = c.Id_Classe ORDER BY e.nom")->fetchAll(PDO::FETCH_ASSOC);
+
+// Récupération des professeurs
+$profs = $db->query("SELECT p.*, m.libelle as matiere_nom FROM professeur p LEFT JOIN matiere m ON p.Id_Matiere = m.Id_Matiere ORDER BY p.nom")->fetchAll(PDO::FETCH_ASSOC);
+
+// Récupération des admins
+$admins = $db->query("SELECT * FROM utilisateur WHERE role = 'Admin' ORDER BY login")->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -91,31 +110,76 @@ $users = $userModel->readAll();
                     </div>
                 <?php endif; ?>
 
-                <div class="form-grid" style="margin-bottom: 24px;">
-                    <div class="form-box">
-                        <h3>Ajouter un administrateur</h3>
-                        <form action="../../controllers/AdminController.php" method="POST">
-                            <input type="hidden" name="action" value="add_admin">
+                <!-- Formulaire unique et dynamique de création d'utilisateurs -->
+                <div class="form-box" style="margin-bottom: 24px;">
+                    <h3>Créer un nouvel utilisateur</h3>
+                    
+                    <form id="userCreationForm" action="../../controllers/AdminController.php" method="POST">
+                        <input type="hidden" id="actionInput" name="action" value="add_admin">
+                        
+                        <!-- Sélection du rôle -->
+                        <div class="form-group">
+                            <label>Rôle de l'utilisateur</label>
+                            <select id="roleSelect" name="role" required onchange="updateFormFields()">
+                                <option value="">-- Sélectionner un rôle --</option>
+                                <option value="admin">Administrateur</option>
+                                <option value="teacher">Professeur</option>
+                                <option value="student">Étudiant</option>
+                            </select>
+                        </div>
+
+                        <!-- Champs communs (Nom, Prénom, Email, Mot de passe) -->
+                        <div id="commonFields" style="display: none;">
                             <div class="form-group">
                                 <label>Nom</label>
-                                <input type="text" name="nom" placeholder="Nom" required>
+                                <input type="text" name="nom" id="nomInput" placeholder="Nom" required>
                             </div>
                             <div class="form-group">
                                 <label>Prénom</label>
-                                <input type="text" name="prenom" placeholder="Prénom" required>
+                                <input type="text" name="prenom" id="prenomInput" placeholder="Prénom" required>
                             </div>
                             <div class="form-group">
                                 <label>Adresse email</label>
-                                <input type="email" name="login" placeholder="Email" required>
+                                <input type="email" name="login" id="loginInput" placeholder="Adresse email" required>
                             </div>
                             <div class="form-group">
                                 <label>Mot de passe</label>
-                                <input type="password" name="password" placeholder="Mot de passe" required>
+                                <input type="password" name="password" id="passwordInput" placeholder="Mot de passe" required>
                             </div>
-                            <button type="submit" class="button-danger">Créer administrateur</button>
-                        </form>
-                    </div>
+                        </div>
 
+                        <!-- Champs spécifiques à Professeur -->
+                        <div id="teacherFields" style="display: none;">
+                            <div class="form-group">
+                                <label>Matière</label>
+                                <select name="id_matiere" id="matiereSelect">
+                                    <option value="">-- Matière principale --</option>
+                                    <?php foreach ($matieres as $m): ?>
+                                        <option value="<?= $m['Id_Matiere'] ?>"><?= htmlspecialchars($m['libelle']) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Champs spécifiques à Étudiant -->
+                        <div id="studentFields" style="display: none;">
+                            <div class="form-group">
+                                <label>Classe</label>
+                                <select name="id_classe" id="classeSelect">
+                                    <option value="">-- Sélectionner la classe --</option>
+                                    <?php foreach ($classes as $c): ?>
+                                        <option value="<?= $c['Id_Classe'] ?>"><?= htmlspecialchars($c['libelle']) ?> - <?= htmlspecialchars($c['niveau']) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button type="submit" id="submitBtn" class="button-primary" style="display: none;">Créer l'utilisateur</button>
+                    </form>
+                </div>
+
+                <!-- Formulaires auxiliaires pour Classes et Matières -->
+                <div class="form-grid" style="margin-bottom: 24px;">
                     <div class="form-box">
                         <h3>Créer une classe</h3>
                         <form action="../../controllers/AdminController.php" method="POST">
@@ -139,72 +203,6 @@ $users = $userModel->readAll();
                                 </select>
                             </div>
                             <button type="submit" class="button-warning">Créer la classe</button>
-                        </form>
-                    </div>
-
-                    <div class="form-box">
-                        <h3>Inscrire un étudiant</h3>
-                        <form action="../../controllers/AdminController.php" method="POST">
-                            <input type="hidden" name="action" value="add_student">
-                            <div class="form-group">
-                                <label>Nom</label>
-                                <input type="text" name="nom" placeholder="Nom de l'élève" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Prénom</label>
-                                <input type="text" name="prenom" placeholder="Prénom de l'élève" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Login / Email</label>
-                                <input type="email" name="login" placeholder="Email (Login)" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Mot de passe</label>
-                                <input type="password" name="password" placeholder="Mot de passe" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Classe</label>
-                                <select name="id_classe" required>
-                                    <option value="">-- Sélectionner la classe --</option>
-                                    <?php foreach ($classes as $c): ?>
-                                        <option value="<?= $c['Id_Classe'] ?>"><?= htmlspecialchars($c['libelle']) ?> - <?= htmlspecialchars($c['niveau']) ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <button type="submit" class="button-success">Créer le profil étudiant</button>
-                        </form>
-                    </div>
-
-                    <div class="form-box">
-                        <h3>Recruter un professeur</h3>
-                        <form action="../../controllers/AdminController.php" method="POST">
-                            <input type="hidden" name="action" value="add_teacher">
-                            <div class="form-group">
-                                <label>Nom</label>
-                                <input type="text" name="nom" placeholder="Nom du professeur" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Prénom</label>
-                                <input type="text" name="prenom" placeholder="Prénom" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Email</label>
-                                <input type="email" name="login" placeholder="Email professionnel" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Mot de passe</label>
-                                <input type="password" name="password" placeholder="Mot de passe" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Matière</label>
-                                <select name="id_matiere" required>
-                                    <option value="">-- Matière principale --</option>
-                                    <?php foreach ($matieres as $m): ?>
-                                        <option value="<?= $m['Id_Matiere'] ?>"><?= htmlspecialchars($m['libelle']) ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <button type="submit" class="button-primary">Créer le profil enseignant</button>
                         </form>
                     </div>
 
@@ -297,7 +295,8 @@ $users = $userModel->readAll();
                                         </span>
                                     </td>
                                     <td>
-                                        <form action="../../controllers/AdminController.php" method="POST" style="display:inline;">
+                                        <button type="button" class="button-secondary" onclick="openEditUser('<?= $row['role'] ?>', '<?= addslashes($row['login']) ?>')">Modifier</button>
+                                        <form action="../../controllers/AdminController.php" method="POST" style="display:inline; margin-left:8px;">
                                             <input type="hidden" name="action" value="delete_user">
                                             <input type="hidden" name="login" value="<?= htmlspecialchars($row['login']) ?>">
                                             <button type="submit" class="button-danger" style="font-size:0.85rem; padding: 6px 10px;">Supprimer</button>
@@ -308,6 +307,168 @@ $users = $userModel->readAll();
                         </tbody>
                     </table>
                 </div>
+
+                <div class="form-box" style="margin-top: 24px;">
+                    <h3>Modifier un utilisateur</h3>
+                    <form action="../../controllers/AdminController.php" method="POST">
+                        <input type="hidden" name="action" id="updateAction" value="update_student">
+                        <input type="hidden" name="user_id" id="edit_user_id">
+                        <input type="hidden" name="old_login" id="edit_old_login">
+
+                        <div class="form-group">
+                            <label>Type d'utilisateur</label>
+                            <input type="text" id="edit_user_role" readonly value="Étudiant">
+                        </div>
+                        <div class="form-group">
+                            <label>Email (login)</label>
+                            <input type="email" name="login" id="edit_user_login" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Nom</label>
+                            <input type="text" name="nom" id="edit_user_nom">
+                        </div>
+                        <div class="form-group">
+                            <label>Prénom</label>
+                            <input type="text" name="prenom" id="edit_user_prenom">
+                        </div>
+                        <div class="form-group" id="edit_class_group">
+                            <label>Classe</label>
+                            <select name="id_classe" id="edit_user_classe">
+                                <?php foreach ($classes as $c): ?>
+                                    <option value="<?= $c['Id_Classe'] ?>"><?= htmlspecialchars($c['libelle']) ?> (<?= htmlspecialchars($c['niveau']) ?>)</option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <button type="submit" class="button-primary">Mettre à jour</button>
+                    </form>
+                </div>
+
+                <script>
+                    const studentsData = <?= json_encode(array_map(function($student) {
+                        return [
+                            'id' => $student['id_Etudiant'],
+                            'nom' => $student['nom'],
+                            'prenom' => $student['prenom'],
+                            'login' => $student['login'],
+                            'classe' => $student['Id_Classe']
+                        ];
+                    }, $students), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
+                    const profsData = <?= json_encode(array_map(function($prof) {
+                        return [
+                            'id' => $prof['Id_Professeur'],
+                            'nom' => $prof['nom'],
+                            'prenom' => $prof['prenom'],
+                            'login' => $prof['login']
+                        ];
+                    }, $profs), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
+                    const adminsData = <?= json_encode(array_map(function($admin) {
+                        return [
+                            'login' => $admin['login']
+                        ];
+                    }, $admins), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
+
+                    // Fonction pour mettre à jour le formulaire en fonction du rôle sélectionné
+                    function updateFormFields() {
+                        const roleSelect = document.getElementById('roleSelect');
+                        const selectedRole = roleSelect.value;
+                        const commonFields = document.getElementById('commonFields');
+                        const teacherFields = document.getElementById('teacherFields');
+                        const studentFields = document.getElementById('studentFields');
+                        const submitBtn = document.getElementById('submitBtn');
+                        const actionInput = document.getElementById('actionInput');
+
+                        // Masquer tous les champs
+                        commonFields.style.display = 'none';
+                        teacherFields.style.display = 'none';
+                        studentFields.style.display = 'none';
+                        submitBtn.style.display = 'none';
+
+                        // Afficher les champs appropriés et définir l'action
+                        if (selectedRole === 'admin') {
+                            commonFields.style.display = 'block';
+                            submitBtn.style.display = 'block';
+                            actionInput.value = 'add_admin';
+                            submitBtn.className = 'button-danger';
+                            submitBtn.textContent = 'Créer administrateur';
+                            
+                            // Marquer les champs comme requis
+                            document.getElementById('nomInput').required = true;
+                            document.getElementById('prenomInput').required = true;
+                            document.getElementById('loginInput').required = true;
+                            document.getElementById('passwordInput').required = true;
+                        } else if (selectedRole === 'teacher') {
+                            commonFields.style.display = 'block';
+                            teacherFields.style.display = 'block';
+                            submitBtn.style.display = 'block';
+                            actionInput.value = 'add_teacher';
+                            submitBtn.className = 'button-primary';
+                            submitBtn.textContent = 'Créer le profil enseignant';
+                            
+                            // Marquer les champs comme requis
+                            document.getElementById('nomInput').required = true;
+                            document.getElementById('prenomInput').required = true;
+                            document.getElementById('loginInput').required = true;
+                            document.getElementById('passwordInput').required = true;
+                            document.getElementById('matiereSelect').required = true;
+                        } else if (selectedRole === 'student') {
+                            commonFields.style.display = 'block';
+                            studentFields.style.display = 'block';
+                            submitBtn.style.display = 'block';
+                            actionInput.value = 'add_student';
+                            submitBtn.className = 'button-success';
+                            submitBtn.textContent = 'Créer le profil étudiant';
+                            
+                            // Marquer les champs comme requis
+                            document.getElementById('nomInput').required = true;
+                            document.getElementById('prenomInput').required = true;
+                            document.getElementById('loginInput').required = true;
+                            document.getElementById('passwordInput').required = true;
+                            document.getElementById('classeSelect').required = true;
+                        }
+                    }
+
+                    function openEditUser(role, login) {
+                        document.getElementById('edit_user_role').value = role;
+                        document.getElementById('edit_user_login').value = login;
+                        document.getElementById('edit_user_nom').value = '';
+                        document.getElementById('edit_user_prenom').value = '';
+                        document.getElementById('edit_user_id').value = '';
+                        document.getElementById('edit_old_login').value = role === 'Admin' ? login : '';
+                        document.getElementById('updateAction').value = role === 'Professeur' ? 'update_prof' : (role === 'Admin' ? 'update_admin' : 'update_student');
+
+                        if (role === 'Etudiant') {
+                            document.getElementById('edit_class_group').style.display = 'block';
+                            const student = studentsData.find(u => u.login === login);
+                            if (student) {
+                                document.getElementById('edit_user_nom').value = student.nom;
+                                document.getElementById('edit_user_prenom').value = student.prenom;
+                                document.getElementById('edit_user_id').value = student.id;
+                                document.getElementById('edit_user_classe').value = student.classe;
+                            }
+                        } else {
+                            document.getElementById('edit_class_group').style.display = 'none';
+                        }
+
+                        if (role === 'Professeur') {
+                            const prof = profsData.find(u => u.login === login);
+                            if (prof) {
+                                document.getElementById('edit_user_nom').value = prof.nom;
+                                document.getElementById('edit_user_prenom').value = prof.prenom;
+                                document.getElementById('edit_user_id').value = prof.id;
+                            }
+                        }
+
+                        if (role === 'Admin') {
+                            const admin = adminsData.find(u => u.login === login);
+                            if (admin) {
+                                document.getElementById('edit_user_nom').value = '';
+                                document.getElementById('edit_user_prenom').value = '';
+                            }
+                        }
+
+                        window.scrollTo({top: document.getElementById('edit_user_role').offsetTop - 100, behavior: 'smooth'});
+                    }
+                </script>
             </section>
         </main>
     </div>

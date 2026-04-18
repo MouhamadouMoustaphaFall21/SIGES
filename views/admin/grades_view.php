@@ -6,18 +6,24 @@ require_once '../../models/Grade.php';
 
 $database = new Database();
 $db = $database->getConnection();
+
+$pendingReclamations = 0;
+try {
+    $hasReclamTable = (int) $db->query("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = 'reclamation'")->fetchColumn();
+    if ($hasReclamTable) {
+        $pendingReclamations = (int) $db->query("SELECT COUNT(*) FROM reclamation WHERE statut = 'En attente'")->fetchColumn();
+    }
+} catch (PDOException $e) {
+    $pendingReclamations = 0;
+}
+
 $gradeModel = new Grade($db);
 
 $selected_classe = isset($_GET['id_classe']) ? $_GET['id_classe'] : null;
-$selected_matiere = isset($_GET['id_matiere']) ? $_GET['id_matiere'] : null;
 $classes = $db->query("SELECT * FROM classe")->fetchAll(PDO::FETCH_ASSOC);
 
 $subjects = [];
 $students = [];
-$evaluations = [];
-$notes = [];
-$noteMap = [];
-$sheetInfo = ['classe' => '', 'matiere' => '', 'semestre' => '', 'professeur' => ''];
 $className = '';
 foreach ($classes as $c) {
     if ($selected_classe && $c['Id_Classe'] == $selected_classe) {
@@ -27,25 +33,52 @@ foreach ($classes as $c) {
 }
 
 if ($selected_classe) {
+    $detailedGrades = $gradeModel->getDetailedGradesByClass($selected_classe);
     $subjects = $gradeModel->getSubjectsByClass($selected_classe);
-}
 
-if ($selected_classe && $selected_matiere) {
-    $students = $gradeModel->getStudentsByClass($selected_classe);
-    $evaluations = $gradeModel->getEvaluationsByClassAndSubject($selected_classe, $selected_matiere);
-    $notes = $gradeModel->getNotesByClassAndSubject($selected_classe, $selected_matiere);
+    // Grouper les notes par étudiant
+    $students = [];
+    $subjectList = array_column($subjects, 'libelle');
+    $subjectCoeffs = array_column($subjects, 'coefficient', 'libelle');
 
-    foreach ($notes as $row) {
-        if ($row['Id_Evaluation']) {
-            $noteMap[$row['id_Etudiant']][$row['Id_Evaluation']] = $row['note'];
+    foreach ($detailedGrades as $grade) {
+        $id = $grade['id_Etudiant'];
+        if (!isset($students[$id])) {
+            $students[$id] = [
+                'id_Etudiant' => $grade['id_Etudiant'],
+                'nom' => $grade['nom'],
+                'prenom' => $grade['prenom'],
+                'grades' => [],
+                'moyenne_generale' => null
+            ];
+        }
+        $students[$id]['grades'][$grade['matiere']] = $grade['note'];
+    }
+
+    // Calculer la moyenne générale pour chaque étudiant
+    foreach ($students as &$student) {
+        $sum_note_coeff = 0;
+        $sum_coeff = 0;
+        foreach ($student['grades'] as $matiere => $note) {
+            if ($note !== null) {
+                $coeff = $subjectCoeffs[$matiere] ?? 1;
+                $sum_note_coeff += $note * $coeff;
+                $sum_coeff += $coeff;
+            }
+        }
+        if ($sum_coeff > 0) {
+            $student['moyenne_generale'] = round($sum_note_coeff / $sum_coeff, 2);
         }
     }
 
-    if (!empty($evaluations)) {
-        $sheetInfo['matiere'] = $evaluations[0]['matiere'];
-        $sheetInfo['semestre'] = $evaluations[0]['semestre'];
-        $sheetInfo['professeur'] = $evaluations[0]['professeur'];
-    }
+    // Trier les étudiants par moyenne décroissante, NULL en dernier
+    $students = array_values($students);
+    usort($students, function($a, $b) {
+        if ($a['moyenne_generale'] === null && $b['moyenne_generale'] === null) return 0;
+        if ($a['moyenne_generale'] === null) return 1;
+        if ($b['moyenne_generale'] === null) return -1;
+        return $b['moyenne_generale'] <=> $a['moyenne_generale'];
+    });
 }
 ?>
 
@@ -57,6 +90,7 @@ if ($selected_classe && $selected_matiere) {
     <title>Fiche de notes - SIGES</title>
     <link rel="stylesheet" href="../../assets/css/style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css">
+    <script src="../../assets/js/pdf-export.js"></script>
     <style>
         .pv-sheet {
             width: 100%;
@@ -213,39 +247,32 @@ if ($selected_classe && $selected_matiere) {
                 </div>
                 <div class="filter-section" style="background: rgba(226, 232, 240, 0.8);">
                     <form method="GET" style="display: flex; gap: 10px; align-items: center; width: 100%; flex-wrap: wrap;">
-                        <label>Choisir une classe :</label>
-                        <select name="id_classe" onchange="this.form.submit()" style="flex:1; min-width:180px;">
-                            <option value="">-- Sélectionner --</option>
+                        <label for="id_classe">Choisir une classe :</label>
+                        <select name="id_classe" id="id_classe" style="flex:1; min-width:180px; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                            <option value="">-- Sélectionner une classe --</option>
                             <?php foreach ($classes as $c): ?>
                                 <option value="<?= $c['Id_Classe'] ?>" <?= $selected_classe == $c['Id_Classe'] ? 'selected' : '' ?> >
                                     <?= htmlspecialchars($c['libelle']) ?> (<?= htmlspecialchars($c['niveau']) ?>)
                                 </option>
                             <?php endforeach; ?>
                         </select>
-
-                        <?php if ($selected_classe): ?>
-                            <label>Choisir une matière :</label>
-                            <select name="id_matiere" onchange="this.form.submit()" style="flex:1; min-width:180px;">
-                                <option value="">-- Sélectionner la matière --</option>
-                                <?php foreach ($subjects as $s): ?>
-                                    <option value="<?= $s['Id_Matiere'] ?>" <?= $selected_matiere == $s['Id_Matiere'] ? 'selected' : '' ?> >
-                                        <?= htmlspecialchars($s['libelle']) ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        <?php endif; ?>
+                        <button type="submit" class="button-primary" style="padding: 8px 16px;">Afficher</button>
                     </form>
-                    <button class="button-primary" onclick="window.print()">Imprimer le PV</button>
+                    <?php if ($selected_classe): ?>
+                        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-left:auto;">
+                            <button onclick="downloadNotesPDF('pv-deliberation-<?= htmlspecialchars($selected_classe) ?>.pdf')" class="button-primary" style="padding: 8px 16px;border:none;cursor:pointer;">Télécharger PDF</button>
+                        </div>
+                    <?php endif; ?>
                 </div>
 
-                <?php if ($selected_classe && $selected_matiere && !empty($evaluations)): ?>
+                <?php if ($selected_classe && !empty($students)): ?>
                     <div class="pv-sheet">
                         <div class="pv-header">
                             <div>
                                 <img src="../../assets/img/logo_simple-SAP.png" alt="SIGES logo">
                             </div>
                             <div class="pv-document-title">
-                                <h1>Fiche de notes de la classe de : <?= htmlspecialchars($className) ?></h1>
+                                <h1>PV de délibération — <?= htmlspecialchars($className) ?></h1>
                                 <p>Année scolaire : <?= date('Y') - 1 ?> / <?= date('Y') ?></p>
                             </div>
                             <div></div>
@@ -253,16 +280,16 @@ if ($selected_classe && $selected_matiere) {
 
                         <div class="pv-meta">
                             <div class="meta-item">
-                                <strong>Matière</strong>
-                                <?= htmlspecialchars($sheetInfo['matiere']) ?>
+                                <strong>Matières</strong>
+                                <?= !empty($subjects) ? htmlspecialchars(implode(', ', array_column($subjects, 'libelle'))) : 'Toutes les matières' ?>
                             </div>
                             <div class="meta-item">
-                                <strong>Semestre</strong>
-                                <?= htmlspecialchars($sheetInfo['semestre']) ?>
+                                <strong>Classe</strong>
+                                <?= htmlspecialchars($className) ?>
                             </div>
                             <div class="meta-item">
-                                <strong>Professeur</strong>
-                                <?= htmlspecialchars($sheetInfo['professeur']) ?>
+                                <strong>Effectif</strong>
+                                <?= count($students) ?> étudiants
                             </div>
                         </div>
 
@@ -270,33 +297,34 @@ if ($selected_classe && $selected_matiere) {
                             <table class="pv-table">
                                 <thead>
                                     <tr>
+                                        <th>Rang</th>
                                         <th>Matricule</th>
                                         <th>Nom</th>
                                         <th>Prénom</th>
-                                        <?php foreach ($evaluations as $index => $evaluation): ?>
-                                            <th><?= $index === 3 ? 'COMP' : 'D' . ($index + 1) ?></th>
+                                        <?php foreach ($subjectList as $subj): ?>
+                                            <th><?= htmlspecialchars($subj) ?></th>
                                         <?php endforeach; ?>
-                                    </tr>
-                                    <tr>
-                                        <th colspan="3"></th>
-                                        <?php foreach ($evaluations as $evaluation): ?>
-                                            <th class="small"><?= date('d/m', strtotime($evaluation['date_eval'])) ?></th>
-                                        <?php endforeach; ?>
+                                        <th>Moyenne générale</th>
+                                        <th>Résultat</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php foreach ($students as $student): ?>
+                                    <?php $rank = 1; foreach ($students as $student): ?>
+                                        <?php
+                                            $moyenne = $student['moyenne_generale'] !== null ? number_format($student['moyenne_generale'], 2) : '—';
+                                            $isAdmis = $student['moyenne_generale'] !== null && $student['moyenne_generale'] >= 10;
+                                        ?>
                                         <tr>
+                                            <td><?= $rank++ ?></td>
                                             <td><?= htmlspecialchars(str_pad($student['id_Etudiant'], 5, '0', STR_PAD_LEFT)) ?></td>
                                             <td><?= htmlspecialchars($student['nom']) ?></td>
                                             <td><?= htmlspecialchars($student['prenom']) ?></td>
-                                            <?php foreach ($evaluations as $evaluation): ?>
-                                                <td>
-                                                    <?= isset($noteMap[$student['id_Etudiant']][$evaluation['Id_Evaluation']])
-                                                        ? htmlspecialchars(number_format($noteMap[$student['id_Etudiant']][$evaluation['Id_Evaluation']], 2))
-                                                        : '' ?>
-                                                </td>
+                                            <?php foreach ($subjectList as $subj): ?>
+                                                <?php $note = $student['grades'][$subj] ?? null; ?>
+                                                <td class="<?= $note !== null && $note >= 10 ? 'note-pass' : ($note !== null ? 'note-fail' : '') ?>"><?= $note !== null ? number_format($note, 2) : '—' ?></td>
                                             <?php endforeach; ?>
+                                            <td class="<?= $isAdmis ? 'note-pass' : 'note-fail' ?>"><?= $moyenne ?></td>
+                                            <td class="<?= $isAdmis ? 'note-pass' : 'note-fail' ?>"><?= $isAdmis ? 'Admis' : 'Ajourné' ?></td>
                                         </tr>
                                     <?php endforeach; ?>
                                 </tbody>
@@ -307,10 +335,8 @@ if ($selected_classe && $selected_matiere) {
                             <div><strong>Effectif de la classe :</strong> <?= count($students) ?></div>
                         </div>
                     </div>
-                <?php elseif ($selected_classe && $selected_matiere): ?>
-                    <p>Aucune fiche de notes disponible pour cette matière dans cette classe.</p>
                 <?php elseif ($selected_classe): ?>
-                    <p>Veuillez sélectionner une matière pour afficher le PV.</p>
+                    <p>Aucune fiche de notes disponible pour cette classe.</p>
                 <?php else: ?>
                     <p>Veuillez sélectionner une classe pour afficher le PV.</p>
                 <?php endif; ?>

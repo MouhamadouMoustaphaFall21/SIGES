@@ -83,6 +83,7 @@ $active_page = 'grades_entry';
     <title>Saisie des notes - SIGES</title>
     <link rel="stylesheet" href="../../assets/css/style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css">
+    <script src="../../assets/js/pdf-export.js"></script>
     <style>
         .toast{display:flex;align-items:center;gap:12px;padding:14px 20px;border-radius:12px;font-size:.95rem;font-weight:500;margin-top:16px;animation:slideIn .35s ease}
         .toast-success{background:#d1fae5;color:#065f46;border:1px solid #6ee7b7}
@@ -236,16 +237,10 @@ $active_page = 'grades_entry';
         <section class="section-block">
             <div class="section-title-row"><h2>Exporter</h2></div>
             <div style="display:flex;gap:12px;flex-wrap:wrap;">
-                <a href="export_notes.php?id_classe=<?= $selected_classe ?>&id_evaluation=<?= $id_evaluation ?>"
-                   target="_blank"
-                   style="display:inline-flex;align-items:center;gap:8px;padding:12px 22px;background:#1A3C5A;color:white;border-radius:10px;text-decoration:none;font-weight:700;font-size:.93rem;">
-                    <i class='bx bx-download'></i>Aperçu PDF de cette évaluation
-                </a>
-                <a href="export_notes.php?id_classe=<?= $selected_classe ?>&id_evaluation=<?= $id_evaluation ?>&auto=1"
-                   target="_blank"
-                   style="display:inline-flex;align-items:center;gap:8px;padding:12px 22px;background:#f1f5f9;color:#1A3C5A;border:1px solid #e2e8f0;border-radius:10px;text-decoration:none;font-weight:700;font-size:.93rem;">
-                    <i class='bx bx-printer'></i>Imprimer directement
-                </a>
+                <button onclick="downloadNotesPDF('evaluation-notes.pdf')"
+                   style="display:inline-flex;align-items:center;gap:8px;padding:12px 22px;background:#1A3C5A;color:white;border-radius:10px;border:none;font-weight:700;font-size:.93rem;cursor:pointer;">
+                    <i class='bx bx-download'></i>Télécharger PDF de cette évaluation
+                </button>
             </div>
         </section>
         <?php endif; ?>
