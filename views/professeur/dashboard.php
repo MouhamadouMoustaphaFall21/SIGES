@@ -60,7 +60,6 @@ $active_page = 'dashboard';
     <link rel="stylesheet" href="../../assets/css/style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="../../assets/js/pdf-export.js"></script>
     <style>
         .toast{display:flex;align-items:center;gap:12px;padding:14px 20px;border-radius:12px;font-size:.95rem;font-weight:500;margin-bottom:20px;animation:slideIn .35s ease}
         .toast-success{background:#d1fae5;color:#065f46;border:1px solid #6ee7b7}
@@ -207,7 +206,7 @@ $active_page = 'dashboard';
                         <select class="select-inline" id="exp_eval">
                             <option value="">— Bulletin complet (toutes les notes) —</option>
                             <?php foreach ($evaluations as $ev): ?>
-                                <option value="<?= $ev['Id_Evaluation'] ?>">
+                                <option value="<?= $ev['Id_Evaluation'] ?>" data-classe="<?= htmlspecialchars($ev['Id_Classe'] ?? '') ?>">
                                     <?= htmlspecialchars($ev['matiere']) ?> · S<?= $ev['semestre'] ?> · <?= $ev['date_eval'] ?>
                                 </option>
                             <?php endforeach; ?>
@@ -215,7 +214,7 @@ $active_page = 'dashboard';
                     </div>
 
                     <div style="display:flex;gap:10px;">
-                        <button onclick="downloadNotesPDF('notes-classe-<?= htmlspecialchars($selected_classe) ?>.pdf')"
+                        <button type="button" onclick="openTeacherNotesExport()"
                            class="export-btn export-btn-primary" style="flex:1;border:none;cursor:pointer;">
                             <i class='bx bx-download'></i>Télécharger Notes PDF
                         </button>
@@ -237,7 +236,7 @@ $active_page = 'dashboard';
                     </div>
 
                     <div style="display:flex;gap:10px;margin-top:auto;">
-                        <button onclick="downloadSchedulePDF('emploi-du-temps-<?= htmlspecialchars($profData['prenom'].'-'.$profData['nom']) ?>.pdf')"
+                        <button type="button" onclick="openTeacherScheduleExport()"
                            class="export-btn export-btn-primary" style="flex:1;border:none;cursor:pointer;">
                             <i class='bx bx-download'></i>Télécharger PDF
                         </button>
@@ -296,6 +295,45 @@ new Chart(document.getElementById('distributionChart').getContext('2d'), {
     type:'doughnut',
     data:{labels:<?= json_encode(array_keys($distribution)) ?>,datasets:[{data:<?= json_encode(array_values($distribution)) ?>,backgroundColor:['#F87171','#FBBF24','#60A5FA','#34D399','#8B5CF6']}]},
     options:{responsive:true,plugins:{legend:{position:'bottom'}}}
+});
+
+function openTeacherScheduleExport() {
+    window.open('schedule.php?auto=1', '_blank');
+}
+
+function openTeacherNotesExport() {
+    const classe = document.getElementById('exp_classe').value;
+    const evaluation = document.getElementById('exp_eval').value;
+    if (evaluation) {
+        window.open('grades_entry.php?id_classe=' + encodeURIComponent(classe) + '&id_evaluation=' + encodeURIComponent(evaluation) + '&auto=1', '_blank');
+    } else {
+        window.open('view_grades.php?id_classe=' + encodeURIComponent(classe) + '&auto=1', '_blank');
+    }
+}
+
+function updateEvalSelect() {
+    const classe = document.getElementById('exp_classe').value;
+    const evalSelect = document.getElementById('exp_eval');
+    let selectedValue = evalSelect.value;
+    const options = Array.from(evalSelect.options);
+
+    options.forEach(option => {
+        const optionClass = option.dataset.classe || '';
+        if (!option.value) {
+            option.hidden = false;
+            return;
+        }
+        option.hidden = optionClass !== classe;
+    });
+
+    const visibleOptions = options.filter(option => !option.hidden);
+    if (!visibleOptions.some(opt => opt.value === selectedValue)) {
+        evalSelect.value = visibleOptions.length > 0 ? visibleOptions[0].value : '';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    updateEvalSelect();
 });
 
 const t = document.querySelector('.toast');

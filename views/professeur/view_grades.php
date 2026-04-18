@@ -50,6 +50,14 @@ $ranking = $gradeModel->getRankingByClasse($selected_classe);
     <title>Classement des Élèves - SIGES</title>
     <link rel="stylesheet" href="../../assets/css/style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css">
+    <style>
+        @media print {
+            body { margin: 0; }
+            .student-sidebar, .sidebar-nav, .page-header, form, .logout-btn, .sidebar-section, .section-title-row > form { display: none !important; }
+            .student-main { margin-left: 0 !important; padding: 0 !important; }
+            .table-card, table { width: 100% !important; }
+        }
+    </style>
 </head>
 <body>
     <div class="student-shell">
@@ -111,5 +119,10 @@ include '_sidebar.php';
             </section>
         </main>
     </div>
+    <script>
+        if (new URLSearchParams(window.location.search).get('auto') === '1') {
+            window.addEventListener('load', () => setTimeout(() => window.print(), 500));
+        }
+    </script>
 </body>
 </html>

@@ -90,7 +90,15 @@ if ($selected_classe) {
     <title>Fiche de notes - SIGES</title>
     <link rel="stylesheet" href="../../assets/css/style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css">
-    <script src="../../assets/js/pdf-export.js"></script>
+    <script>
+        window.downloadSchedulePDF = function(filename = 'emploi-du-temps.pdf') {
+            window.print();
+        };
+
+        window.downloadNotesPDF = function(filename = 'notes.pdf') {
+            window.print();
+        };
+    </script>
     <style>
         .pv-sheet {
             width: 100%;
@@ -188,14 +196,29 @@ if ($selected_classe) {
         }
 
         @media print {
-            body { background: #fff; margin: 0; }
-            .student-shell { padding: 0; }
-            .student-sidebar, .page-header, .filter-section, .button-primary, .logout-btn, .sidebar-nav { display: none !important; }
+            body { background: #fff; margin: 0; color: #0f172a; font-family: Arial, sans-serif; }
+            .student-shell { padding: 0; margin: 0; }
+            .student-sidebar, .page-header, .filter-section, .button-primary, .logout-btn, .sidebar-nav, .header-user-card { display: none !important; }
             .student-main { margin-left: 0; padding: 0; }
-            .section-block { border: none; box-shadow: none; padding: 0; }
-            .table-card { box-shadow: none; border: none; }
-            .pv-sheet .pv-table th,
-            .pv-sheet .pv-table td { border-color: #000; }
+            .section-block { border: none; box-shadow: none; padding: 0; margin: 0; }
+            .table-card { box-shadow: none; border: none; background: transparent; }
+
+            .pv-sheet { margin: 0; padding: 0; }
+            .pv-header { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #1A3C5A; }
+            .pv-header img { width: 52px; height: 52px; }
+            .pv-document-title { flex: 1; }
+            .pv-document-title h1 { font-size: 1.35rem; margin: 0 0 6px; color: #1A3C5A; line-height: 1.1; }
+            .pv-document-title p { margin: 0; font-size: .88rem; color: #475569; }
+
+            .pv-meta { display: flex; flex-wrap: wrap; gap: 16px; margin: 14px 0; padding: 12px 0; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; }
+            .pv-meta .meta-item { flex: 1 1 180px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 12px; }
+            .pv-meta .meta-item strong { display: block; font-weight: 700; margin-bottom: 4px; color: #1A3C5A; }
+
+            .pv-sheet .pv-table { margin: 12px 0; border-collapse: collapse; width: 100%; }
+            .pv-sheet .pv-table th { background: #1A3C5A !important; color: #fff !important; border: 1px solid #1A3C5A !important; padding: 10px 8px !important; font-weight: 700 !important; font-size: .85rem !important; text-align: center !important; }
+            .pv-sheet .pv-table td { border: 1px solid #d1d5db !important; padding: 8px !important; text-align: center !important; font-size: .85rem !important; }
+            .pv-sheet .pv-table tr:nth-child(even) { background: #f8fafc; }
+            .pv-sheet .pv-summary { margin-top: 14px; justify-content: flex-end; }
         }
     </style>
 </head>

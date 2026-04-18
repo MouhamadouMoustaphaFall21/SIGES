@@ -42,6 +42,10 @@ $_initials   = strtoupper(substr($profData['prenom'], 0, 1) . substr($profData['
            class="<?= $_sid_page === 'view_grades' ? 'active' : '' ?>">
             <i class='bx bx-bar-chart-alt-2'></i>Classement
         </a>
+        <a href="reclamations.php"
+           class="<?= $_sid_page === 'reclamations' ? 'active' : '' ?>">
+            <i class='bx bx-message-square-detail'></i>Réclamations
+        </a>
     </nav>
 
     <a href="../../controllers/Logout.php" class="logout-btn">

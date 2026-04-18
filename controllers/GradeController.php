@@ -70,6 +70,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST'
     exit();
 }
 
+// ── Mise à jour du statut d'une réclamation (enseignant) ----------------------
+if ($_SERVER['REQUEST_METHOD'] === 'POST'
+    && isset($_POST['action'])
+    && $_POST['action'] === 'update_reclamation_status'
+    && isset($_SESSION['user_role'])
+    && $_SESSION['user_role'] === 'Professeur'
+) {
+    require_once '../config/database.php';
+    require_once '../models/Grade.php';
+
+    $database   = new Database();
+    $db         = $database->getConnection();
+    $gradeModel = new Grade($db);
+
+    $idReclamation = intval($_POST['id_reclamation'] ?? 0);
+    $newStatus     = trim($_POST['new_status'] ?? '');
+    $allowedStatuses = ['Traité', 'Rejeté'];
+
+    if ($idReclamation > 0 && in_array($newStatus, $allowedStatuses, true)) {
+        $res = $gradeModel->updateReclamationStatus($idReclamation, $newStatus);
+        header("Location: ../views/professeur/reclamations.php?status=" . ($res ? 'updated' : 'error'));
+        exit();
+    }
+
+    header("Location: ../views/professeur/reclamations.php?status=error");
+    exit();
+}
+
 // Accès direct interdit
 header("Location: ../index.php");
 exit();

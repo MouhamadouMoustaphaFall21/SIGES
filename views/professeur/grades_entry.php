@@ -83,7 +83,15 @@ $active_page = 'grades_entry';
     <title>Saisie des notes - SIGES</title>
     <link rel="stylesheet" href="../../assets/css/style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css">
-    <script src="../../assets/js/pdf-export.js"></script>
+    <script>
+        window.downloadSchedulePDF = function(filename = 'emploi-du-temps.pdf') {
+            window.print();
+        };
+
+        window.downloadNotesPDF = function(filename = 'notes.pdf') {
+            window.print();
+        };
+    </script>
     <style>
         .toast{display:flex;align-items:center;gap:12px;padding:14px 20px;border-radius:12px;font-size:.95rem;font-weight:500;margin-top:16px;animation:slideIn .35s ease}
         .toast-success{background:#d1fae5;color:#065f46;border:1px solid #6ee7b7}
@@ -99,6 +107,24 @@ $active_page = 'grades_entry';
         .save-bar button{background:#F29100;color:white;border:none;padding:12px 28px;border-radius:10px;font-weight:700;font-size:1rem;cursor:pointer;transition:background .2s}
         .save-bar button:hover{background:#d97d00}
         .note-count{background:rgba(255,255,255,.15);border-radius:8px;padding:4px 12px;font-size:.9rem;font-weight:600}
+
+        @media print {
+            body { background: #fff; margin: 0; color: #0f172a; font-family: Arial, sans-serif; }
+            .student-shell, .student-main { margin: 0; padding: 0; }
+            .student-sidebar, .sidebar-nav, .logout-btn, .save-bar, .button-primary, .section-title-row > form, .header-user-card, .profile-box { display: none !important; }
+            
+            .page-header { display: block !important; margin: 0 0 16px; padding: 12px 0; border-bottom: 2px solid #1A3C5A; }
+            .page-header .eyebrow { display: block; font-size: .85rem; color: #64748b; margin-bottom: 4px; }
+            .page-header h1 { font-size: 1.35rem; margin: 0; color: #1A3C5A; font-weight: 700; }
+            .page-header p { font-size: .85rem; margin: 4px 0 0; color: #475569; }
+            
+            .section-block, .table-card { border: none !important; box-shadow: none !important; background: transparent !important; padding: 0 !important; margin: 0 !important; }
+            
+            table { width: 100% !important; border-collapse: collapse !important; margin: 12px 0; }
+            th { background: #1A3C5A !important; color: #fff !important; border: 1px solid #1A3C5A !important; padding: 10px 8px !important; font-weight: 700 !important; font-size: .88rem !important; text-align: center !important; }
+            td { border: 1px solid #d1d5db !important; padding: 8px !important; text-align: center !important; font-size: .88rem !important; }
+            tr:nth-child(even) { background: #f8fafc; }
+        }
     </style>
 </head>
 <body>
@@ -287,6 +313,10 @@ updateCount();
 
 const t = document.querySelector('.toast');
 if (t) setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .5s';setTimeout(()=>t.remove(),500)},6000);
+
+if (new URLSearchParams(window.location.search).get('auto') === '1') {
+    window.addEventListener('load', () => setTimeout(() => window.print(), 500));
+}
 </script>
 </body>
 </html>

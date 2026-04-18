@@ -79,10 +79,40 @@ usort($timeSlots, function ($a, $b) {
     <title>Gestion Emploi du Temps - SIGES</title>
     <link rel="stylesheet" href="../../assets/css/style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css">
-    <script src="../../assets/js/pdf-export.js"></script>
+    <script>
+        window.downloadSchedulePDF = function(filename = 'emploi-du-temps.pdf') {
+            window.print();
+        };
+
+        window.downloadNotesPDF = function(filename = 'notes.pdf') {
+            window.print();
+        };
+    </script>
     <style>
         .grid-header.day-highlight { background: rgba(56,189,248,0.12); color: #1A3C5A; }
         .schedule-cell.day-highlight { background: rgba(56,189,248,0.08); }
+
+        @media print {
+            body { background: #fff; margin: 0; color: #1a202c; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+            .student-shell, .student-main { margin: 0; padding: 0; }
+            .student-sidebar, .sidebar-nav, .logout-btn, .button-primary, .toolbar-right, .toolbar-select, .btn-today, .sidebar-section, .filter-section { display: none !important; }
+            
+            .page-header { display: block !important; margin: 0 0 20px; padding: 16px 0; border-bottom: 3px solid #2d3748; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; border-radius: 0 0 12px 12px; }
+            .page-header .eyebrow { display: block; font-size: .95rem; color: rgba(255,255,255,0.9); margin-bottom: 6px; font-weight: 600; }
+            .page-header h1 { font-size: 1.6rem; margin: 0; color: #fff; font-weight: 700; }
+            .page-header p { font-size: .95rem; margin: 6px 0 0; color: rgba(255,255,255,0.9); }
+            
+            .section-block { border: none !important; box-shadow: none !important; background: transparent !important; padding: 0 !important; margin: 0 !important; }
+            .table-card { border: 3px solid #2d3748 !important; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important; background: #fff !important; border-radius: 16px; overflow: hidden; }
+            
+            table { width: 100% !important; border-collapse: collapse !important; margin: 16px 0; }
+            th { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important; color: #fff !important; border: 2px solid #2d3748 !important; padding: 14px 12px !important; text-align: center !important; font-weight: 700 !important; font-size: .95rem !important; text-transform: uppercase; letter-spacing: 0.5px; }
+            td { border: 1px solid #4a5568 !important; padding: 12px !important; text-align: center !important; font-size: .9rem !important; background: #f7fafc; }
+            tr:nth-child(even) { background: linear-gradient(135deg, #f093fb 0%, #f5576c 50%, #a8edea 100%) !important; opacity: 0.8; }
+            
+            .section-title-row { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%) !important; padding: 16px 20px; border-radius: 12px; margin-bottom: 20px; border: 2px solid #2d3748; }
+            .section-title-row h2 { color: #2d3748; font-size: 1.4rem; font-weight: 700; margin: 0; }
+        }
     </style>
 </head>
 

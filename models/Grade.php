@@ -432,6 +432,33 @@ class Grade {
         ]);
     }
 
+    public function getReclamationsForTeacher($id_prof) {
+        $query = "SELECT r.id_reclamation, r.motif, r.statut,
+                         e.nom AS etu_nom, e.prenom AS etu_prenom,
+                         c.libelle AS classe, c.niveau,
+                         m.libelle AS matiere, ev.semestre, ev.date_eval
+                  FROM reclamation r
+                  LEFT JOIN etudiant e ON e.id_Etudiant = r.id_Etudiant
+                  LEFT JOIN evaluation ev ON ev.Id_Evaluation = r.Id_Evaluation
+                  LEFT JOIN matiere m ON m.Id_Matiere = ev.Id_Matiere
+                  LEFT JOIN classe c ON e.Id_Classe = c.Id_Classe
+                  WHERE ev.Id_Professeur = :id_prof
+                  ORDER BY r.statut ASC, r.id_reclamation DESC";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id_prof', $id_prof);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function updateReclamationStatus($id_reclamation, $statut) {
+        $query = "UPDATE reclamation SET statut = :statut WHERE id_reclamation = :id_reclamation";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':statut', $statut);
+        $stmt->bindParam(':id_reclamation', $id_reclamation, PDO::PARAM_INT);
+        return $stmt->execute();
+    }
+
     /**
      * Génère le PV de délibération pour une classe entière
      */
