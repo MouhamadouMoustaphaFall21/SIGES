@@ -225,6 +225,6 @@ Projet réalisé par :
 - **[Votre Nom]** — Licence 2 Informatique
 - **[Nom Binôme]** — Licence 2 Informatique
 
-Encadrant : [Nom de l'encadrant]
-Université : [Nom de l'université]
+Encadrant : Seny Mbaye
+Université : Université Iba der Thaim
 Année universitaire : 2025 - 2026
