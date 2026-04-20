@@ -216,15 +216,3 @@ Moyenne = (Note Devoir × 0.4) + (Note Examen × 0.6)
 
 Le bulletin n'est disponible en téléchargement que lorsque **toutes les matières du semestre** ont une note saisie.
 
----
-
-## Auteurs
-
-Projet réalisé par :
-
-- **[Votre Nom]** — Licence 2 Informatique
-- **[Nom Binôme]** — Licence 2 Informatique
-
-Encadrant : Seny Mbaye
-Université : Université Iba der Thaim
-Année universitaire : 2025 - 2026
