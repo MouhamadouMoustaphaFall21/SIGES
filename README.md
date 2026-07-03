@@ -51,12 +51,12 @@ SIGES est une plateforme de gestion scolaire développée dans le cadre d'un pro
 
 | Couche | Technologie |
 |--------|-------------|
-| Langage serveur | PHP 8.x |
-| Base de données | MySQL 8.x / MariaDB |
+| Langage serveur | PHP |
+| Base de données | MySQL  |
 | Frontend | HTML5, CSS3, JavaScript |
 | Graphiques | Chart.js |
-| Génération PDF | FPDF ou TCPDF |
-| Serveur local | XAMPP / WAMP / Laragon |
+| Génération PDF | FPDF  |
+| Serveur local | XAMPP  |
 | Versioning | Git |
 
 ---
